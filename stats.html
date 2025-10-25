@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeTrackFX | Stats</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="stats.css">
 </head>
 <body>
 
@@ -55,11 +56,24 @@
                 <p id="best-trade">+$350</p>
             </div>
         </div>
-
+        <div class="filter-box">
+  <label for="filter">Filter:</label>
+  <select id="filter">
+    <option>This Week</option>
+    <option>This Month</option>
+    <option>Last 3 Months</option>
+    <option>All Time</option>
+  </select>
+</div>
         <div class="chart-section">
             <h2>Performance Overview</h2>
             <canvas id="profitChart"></canvas>
         </div>
+        <div class="chart-tabs">
+  <button class="tab-btn active" data-chart="profit">Profit/Loss</button>
+  <button class="tab-btn" data-chart="equity">Equity Growth</button>
+  <button class="tab-btn" data-chart="winrate">Win Rate</button>
+</div>
     </section>
 
     <footer>
@@ -103,6 +117,7 @@
             }
         });
     </script>
-
+<script src="scripts.js" defer></script>
+<script src="stats.js" defer></script>
 </body>
 </html>

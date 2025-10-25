@@ -221,37 +221,3 @@ if (tradeForm) {
     });
 }
 
-// =======================================
-// 7. REMOVED/IMPROVED SECTIONS
-// =======================================
-// The 'getFormData' function was redundant; logic is integrated into the submit handler.
-// The manual inline style hover effects were removed. These should be handled entirely by CSS 
-// (using the :hover pseudo-class) to keep JS clean and performant.
-
-/* REMOVED: Inline style hover handling. Use CSS :hover instead.
-document.querySelectorAll('.card').forEach(card => { ... });
-document.querySelectorAll('.hover-box').forEach(box => { ... });
-*/
-// === Stats Page Logic ===
-document.addEventListener("DOMContentLoaded", () => {
-  const trades = JSON.parse(localStorage.getItem("trades")) || [];
-
-  if (document.body.classList.contains("stats-page")) {
-    const totalTrades = trades.length;
-    const wins = trades.filter(t => t.profit > 0).length;
-    const losses = trades.filter(t => t.profit < 0).length;
-    const totalProfit = trades.reduce((acc, t) => acc + (t.profit || 0), 0);
-    const avgProfit =
-      wins > 0 ? trades.filter(t => t.profit > 0).reduce((a, b) => a + b.profit, 0) / wins : 0;
-    const avgLoss =
-      losses > 0 ? trades.filter(t => t.profit < 0).reduce((a, b) => a + b.profit, 0) / losses : 0;
-    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : 0;
-
-    document.getElementById("totalTrades").textContent = totalTrades;
-    document.getElementById("winningTrades").textContent = wins;
-    document.getElementById("winRate").textContent = `${winRate}%`;
-    document.getElementById("avgProfit").textContent = `$${avgProfit.toFixed(2)}`;
-    document.getElementById("avgLoss").textContent = `$${avgLoss.toFixed(2)}`;
-    document.getElementById("totalProfit").textContent = `$${totalProfit.toFixed(2)}`;
-  }
-});
