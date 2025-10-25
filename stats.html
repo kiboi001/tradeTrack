@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeTrackFX | Stats</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">TradeTrack<span>FX</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="stats.html" class="active">Stats</a></li>
+            <li><a href="#">Settings</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN STATS SECTION -->
+    <section class="stats-section">
+        <h1>Your Trading Statistics</h1>
+        <p class="subtext">Track your overall performance and growth over time.</p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Trades</h3>
+                <p id="total-trades">42</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Winning Trades</h3>
+                <p id="winning-trades">29</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Win Rate</h3>
+                <p id="win-rate">69%</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Profit</h3>
+                <p id="total-profit">$1,230</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Average RR (Risk/Reward)</h3>
+                <p id="avg-rr">1:2.5</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Best Trade</h3>
+                <p id="best-trade">+$350</p>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>Performance Overview</h2>
+            <canvas id="profitChart"></canvas>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart.js sample data
+        const ctx = document.getElementById('profitChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Profit ($)',
+                    data: [200, 400, 150, 600, 450, 700],
+                    borderColor: '#009dff',
+                    backgroundColor: 'rgba(0,157,255,0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#fff' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#fff' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

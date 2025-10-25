@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Journal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <img src="2.jpg" alt="logo" class="logo-image">
+      <span class="logo-text">TradeTrackFX</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="journal.html" class="active">Journal</a></li>
+      <li><a href="stats.html">Stats</a></li>
+    </ul>
+  </nav>
+
+  <!-- Journal Section -->
+  <section class="journal-container">
+    <h1>Trade Journal</h1>
+
+    <form id="trade-form">
+      <input type="text" id="pair" placeholder="Currency Pair (e.g., XAUUSD)" required>
+      <input type="number" id="lot" placeholder="Lot Size" required>
+      <select id="result">
+        <option value="win">Win</option>
+        <option value="loss">Loss</option>
+      </select>
+      <input type="number" id="profitLoss" placeholder="Profit / Loss ($)" required>
+      <input type="date" id="date" required>
+      <textarea id="notes" placeholder="Notes (optional)"></textarea>
+      <button type="submit">Add Trade</button>
+    </form>
+
+    <table id="journal-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Pair</th>
+          <th>Lot</th>
+          <th>Result</th>
+          <th>P/L ($)</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="journal-stats">
+    <h2>Trading Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <h3>Total Trades</h3>
+        <p id="total-trades">0</p>
+      </div>
+      <div class="stat-box">
+        <h3>Winning Trades</h3>
+        <p id="winning-trades">0</p>
+      </div>
+      <div class="stat-box">
+        <h3>Win Rate</h3>
+        <p id="win-rate">0%</p>
+      </div>
+      <div class="stat-box">
+        <h3>Total Profit</h3>
+        <p id="total-profit">0 USD</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="scripts.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeTrackFX Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="2.jpg" alt="TradeTrackFX" />
+        <h2>TradeTrack<span>FX</span></h2>
+      </div>
+      <ul class="nav">
+        <li><a href="index.html" class="active">🏠 Dashboard</a></li>
+        <li><a href="journal.html">📓 Journal</a></li>
+        <li><a href="stats.html">📊 Stats</a></li>
+        <li><a href="#">⚙️ Settings</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>Welcome Back, Champion!</h1>
+        <p id="date"></p>
+      </header>
+
+      <section class="cards">
+        <div class="card">
+          <h3>Account Balance</h3>
+          <p class="value">$10,000</p>
+        </div>
+        <div class="card">
+          <h3>Total Profit</h3>
+          <p class="value profit">+$1,250</p>
+        </div>
+        <div class="card">
+          <h3>Win Rate</h3>
+          <p class="value">68%</p>
+        </div>
+        <div class="card">
+          <h3>Open Trades</h3>
+          <p class="value">2</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("date").textContent =
+      new Date().toLocaleDateString("en-GB", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  </script>
+</body>
+</html>

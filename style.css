@@ -1,0 +1,471 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top left, #0b0c10, #000);
+  color: #fff;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: rgba(15, 17, 25, 0.9);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(0, 153, 255, 0.3);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar .logo {
+  text-align: center;
+}
+
+.sidebar .logo img {
+  width: 60px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sidebar h2 {
+  font-size: 1.4em;
+  color: #fff;
+}
+
+.sidebar h2 span {
+  color: #00aaff;
+}
+
+.nav {
+  list-style: none;
+  margin-top: 40px;
+}
+
+.nav li {
+  margin-bottom: 20px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #ccc;
+  font-size: 1.05em;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.nav a:hover,
+.nav a.active {
+  background: linear-gradient(90deg, rgba(0, 153, 255, 0.15), rgba(0, 153, 255, 0.4));
+  color: #00aaff;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.2);
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  padding: 50px;
+  overflow-y: auto;
+}
+
+header h1 {
+  font-size: 2em;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+header p {
+  margin-top: 5px;
+  color: #9ecbff;
+  font-size: 1em;
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 50px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 153, 255, 0.2);
+}
+
+.card h3 {
+  color: #9ecbff;
+  margin-bottom: 10px;
+}
+
+.card .value {
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+.card .profit {
+  color: #00aaff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top left, #0b0c10, #000);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== NAVBAR / SIDEBAR ========== */
+.navbar {
+  width: 100%;
+  background: rgba(15, 17, 25, 0.9);
+  border-bottom: 1px solid rgba(0, 153, 255, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar .logo {
+  font-size: 1.6em;
+  font-weight: 700;
+  color: #fff;
+}
+
+.navbar .logo span {
+  color: #00aaff;
+}
+
+.navbar img.logo-image {
+  width: 45px;
+  border-radius: 50%;
+  margin-left: 15px;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: #ccc;
+  font-size: 1.05em;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+  background: linear-gradient(90deg, rgba(0, 153, 255, 0.15), rgba(0, 153, 255, 0.4));
+  color: #00aaff;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.3);
+}
+
+/* ========== DASHBOARD PAGE ========== */
+.dashboard {
+  padding: 60px 80px;
+  text-align: center;
+}
+
+.dashboard h1 {
+  font-size: 2.2em;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.dashboard p {
+  color: #9ecbff;
+  font-size: 1.05em;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 50px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 153, 255, 0.2);
+}
+
+.card h3 {
+  color: #9ecbff;
+  margin-bottom: 10px;
+}
+
+.card .value {
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+.card .profit {
+  color: #00aaff;
+}
+
+/* ========== JOURNAL PAGE ========== */
+.journal-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 50px auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0, 153, 255, 0.1);
+}
+
+.journal-container h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #00aaff;
+  font-weight: 600;
+}
+
+#trade-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+#trade-form input,
+#trade-form select,
+#trade-form textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  width: calc(33% - 10px);
+  min-width: 200px;
+  transition: 0.3s;
+}
+
+#trade-form input:focus,
+#trade-form select:focus,
+#trade-form textarea:focus {
+  outline: none;
+  border-color: #00aaff;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.2);
+}
+
+#trade-form button {
+  background: linear-gradient(90deg, #007acc, #00aaff);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#trade-form button:hover {
+  background: linear-gradient(90deg, #00aaff, #007acc);
+  box-shadow: 0 0 15px rgba(0, 153, 255, 0.3);
+}
+
+/* Journal Table */
+#journal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
+}
+
+#journal-table th,
+#journal-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 153, 255, 0.2);
+}
+
+#journal-table th {
+  background: rgba(0, 153, 255, 0.1);
+  color: #00aaff;
+}
+
+#journal-table tr:hover {
+  background: rgba(0, 153, 255, 0.08);
+}
+
+/* Journal Stats */
+.journal-stats {
+  width: 90%;
+  max-width: 900px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.journal-stats h2 {
+  color: #00aaff;
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 15px rgba(0, 153, 255, 0.2);
+}
+
+/* ========== STATS PAGE ========== */
+.stats-page {
+  width: 90%;
+  max-width: 1000px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.stats-page h1 {
+  color: #00aaff;
+  margin-bottom: 30px;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+}
+
+.stats-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+  transition: 0.3s;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 153, 255, 0.2);
+}
+
+.stats-card h3 {
+  color: #9ecbff;
+  margin-bottom: 10px;
+}
+
+.stats-card p {
+  font-size: 1.6em;
+  font-weight: 600;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #007acc, #00aaff);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0c10;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .stat-box, .stats-card {
+  animation: fadeIn 0.6s ease forwards;
+}
+.stats-grid {
+  padding: 60px 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.stat-card {
+  background: var(--bg-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card:hover {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 20px var(--blue-glow);
+  transform: translateY(-5px);
+}
+
+.stat-card h3 {
+  font-size: 1rem;
+  color: var(--accent-blue);
+  margin-bottom: 10px;
+}
+
+.stat-card .value {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.value.positive {
+  color: var(--profit-green);
+}
+
+.value.negative {
+  color: var(--loss-red);
+}
