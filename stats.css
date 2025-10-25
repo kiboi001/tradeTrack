@@ -1,0 +1,62 @@
+/* Navbar Styling (Interactive) */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 15, 25, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 15px 40px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+}
+
+.logo {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.logo span {
+  color: #00aaff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none;
+  color: #bfc9ff;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: #00aaff;
+  text-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+#sync-btn {
+  background: linear-gradient(135deg, #0077ff, #00ccff);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  transition: 0.3s;
+}
+#sync-btn:hover {
+  background: linear-gradient(135deg, #00ccff, #0099ff);
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+}
