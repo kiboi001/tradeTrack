@@ -469,3 +469,76 @@ body {
 .value.negative {
   color: var(--loss-red);
 }
+body {
+  background: linear-gradient(135deg, #050505, #001a2c);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.logo span, .text-blue, .active {
+  color: #00aaff;
+  text-shadow: 0 0 8px rgba(0, 170, 255, 0.7);
+}
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 170, 255, 0.2);
+}
+.chart-section {
+  opacity: 0;
+  animation: fadeIn 1.5s forwards;
+  animation-delay: 0.5s;
+}
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+.filter-box {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.filter-box select {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 15px;
+  border-radius: 10px;
+}
+.chart-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid #00aaff;
+  color: #00aaff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.tab-btn:hover {
+  background: #00aaff;
+  color: #fff;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #0077ff, #00ccff);
+  color: white;
+  border: none;
+  box-shadow: 0 0 10px rgba(0,170,255,0.5);
+}
