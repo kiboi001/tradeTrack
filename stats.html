@@ -1,123 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradeTrackFX | Stats</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="stats.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeTrackFX | Stats</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="stats.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="logo">TradeTrack<span>FX</span></div>
-        <ul class="nav-links">
-            <li><a href="index.html">Dashboard</a></li>
-            <li><a href="journal.html">Journal</a></li>
-            <li><a href="stats.html" class="active">Stats</a></li>
-            <li><a href="#">Settings</a></li>
-        </ul>
-    </nav>
+  <!-- ✅ NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">TradeTrack<span>FX</span></div>
+    <ul class="nav-links">
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="stats.html" class="active">Stats</a></li>
+      <li><a href="#">Settings</a></li>
+    </ul>
+  </nav>
 
-    <!-- MAIN STATS SECTION -->
-    <section class="stats-section">
-        <h1>Your Trading Statistics</h1>
-        <p class="subtext">Track your overall performance and growth over time.</p>
+  <!-- ✅ MAIN SECTION -->
+  <section class="stats-section">
+    <h1>Your Trading Statistics</h1>
+    <p class="subtext">Track your performance, visualize your progress, and stay consistent.</p>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Trades</h3>
-                <p id="total-trades">42</p>
-            </div>
+    <!-- ✅ TRADE INPUT FORM -->
+    <div class="input-card">
+      <h3>Log a Trade</h3>
+      <form id="tradeForm">
+        <input type="text" id="pair" placeholder="Pair (e.g., XAUUSD)" required />
+        <select id="result">
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+        </select>
+        <input type="number" id="profitLoss" placeholder="Profit/Loss ($)" required />
+        <input type="text" id="riskReward" placeholder="Risk:Reward (e.g., 1:2)" required />
+        <input type="text" id="lotSize" placeholder="Lot Size" required />
+        <button type="submit">Add Trade</button>
+      </form>
+    </div>
 
-            <div class="stat-card">
-                <h3>Winning Trades</h3>
-                <p id="winning-trades">29</p>
-            </div>
+    <!-- ✅ STATS OVERVIEW -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total Trades</h3>
+        <p id="total-trades">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Winning Trades</h3>
+        <p id="winning-trades">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Win Rate</h3>
+        <p id="win-rate">0%</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Profit</h3>
+        <p id="total-profit">$0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Average RR</h3>
+        <p id="avg-rr">1:0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Best Trade</h3>
+        <p id="best-trade">$0</p>
+      </div>
+    </div>
 
-            <div class="stat-card">
-                <h3>Win Rate</h3>
-                <p id="win-rate">69%</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>Total Profit</h3>
-                <p id="total-profit">$1,230</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>Average RR (Risk/Reward)</h3>
-                <p id="avg-rr">1:2.5</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>Best Trade</h3>
-                <p id="best-trade">+$350</p>
-            </div>
-        </div>
-        <div class="filter-box">
-  <label for="filter">Filter:</label>
-  <select id="filter">
-    <option>This Week</option>
-    <option>This Month</option>
-    <option>Last 3 Months</option>
-    <option>All Time</option>
-  </select>
-</div>
-        <div class="chart-section">
-            <h2>Performance Overview</h2>
-            <canvas id="profitChart"></canvas>
-        </div>
-        <div class="chart-tabs">
-  <button class="tab-btn active" data-chart="profit">Profit/Loss</button>
-  <button class="tab-btn" data-chart="equity">Equity Growth</button>
-  <button class="tab-btn" data-chart="winrate">Win Rate</button>
-</div>
+    <!-- ✅ FILTER OPTIONS -->
+    <section class="filters">
+      <h2>📊 Filter Your Trades</h2>
+      <div class="filter-grid">
+        <input type="date" id="filter-start" />
+        <input type="date" id="filter-end" />
+        <select id="filter-pair">
+          <option value="">All Pairs</option>
+        </select>
+        <select id="filter-result">
+          <option value="">All Results</option>
+          <option value="win">Wins</option>
+          <option value="loss">Losses</option>
+        </select>
+        <button id="apply-filter">Apply</button>
+        <button id="reset-filter" class="reset">Reset</button>
+      </div>
     </section>
 
-    <footer>
-        <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
-    </footer>
+    <!-- ✅ CHARTS -->
+    <div class="chart-tabs">
+      <button class="tab-btn active" data-chart="profit">Profit/Loss</button>
+      <button class="tab-btn" data-chart="equity">Equity Growth</button>
+      <button class="tab-btn" data-chart="winrate">Win Rate</button>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Chart.js sample data
-        const ctx = document.getElementById('profitChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Profit ($)',
-                    data: [200, 400, 150, 600, 450, 700],
-                    borderColor: '#009dff',
-                    backgroundColor: 'rgba(0,157,255,0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#fff' }
-                    },
-                    x: {
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        ticks: { color: '#fff' }
-                    }
-                },
-                plugins: {
-                    legend: { labels: { color: '#fff' } }
-                }
-            }
-        });
-    </script>
-<script src="scripts.js" defer></script>
-<script src="stats.js" defer></script>
+    <div class="chart-section">
+      <canvas id="profitChart"></canvas>
+      <canvas id="equityChart" style="display: none;"></canvas>
+      <canvas id="winRateChart" style="display: none;"></canvas>
+    </div>
+
+  </section>
+
+  <footer>
+    <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
+  </footer>
+
+  <script src="stats.js"></script>
 </body>
 </html>
