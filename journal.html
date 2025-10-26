@@ -78,32 +78,5 @@
 
   <script src="scripts.js" defer></script>
   <script src="journal.js" defer></script>
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const tradeForm = document.getElementById("trade-form");
-  if (!tradeForm) return;
-
-  tradeForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(tradeForm);
-    const trade = Object.fromEntries(formData.entries());
-
-    // Convert numbers properly
-    trade.profit = parseFloat(trade.profit || 0);
-    trade.result = trade.result.toLowerCase();
-
-    // Get existing trades or create new list
-    const trades = JSON.parse(localStorage.getItem("trades") || "[]");
-    trades.push(trade);
-
-    // Save back to localStorage
-    localStorage.setItem("trades", JSON.stringify(trades));
-
-    alert("✅ Trade saved successfully!");
-    tradeForm.reset();
-  });
-});
-</script>
 </body>
 </html>

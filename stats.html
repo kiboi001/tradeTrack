@@ -62,7 +62,7 @@
       </div>
       <div class="stat-card">
         <h3>Average RR</h3>
-        <p id="avg-rr">1:0</p>
+        <p id="avg-rr">1:a</p>
       </div>
       <div class="stat-card">
         <h3>Best Trade</h3>
@@ -98,8 +98,8 @@
 
     <div class="chart-section">
       <canvas id="profitChart"></canvas>
-      <canvas id="equityChart" style="display: none;"></canvas>
-      <canvas id="winRateChart" style="display: none;"></canvas>
+      <canvas id="equityChart"></canvas>
+      <canvas id="winRateChart"></canvas>
     </div>
 
   </section>
@@ -107,7 +107,9 @@
   <footer>
     <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
   </footer>
-
-  <script src="stats.js"></script>
+  <script src="scripts.js" defer></script>
+  <script src="chart.js" defer></script>
+  <script src="stats.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

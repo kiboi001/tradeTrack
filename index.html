@@ -19,34 +19,35 @@
         <li><a href="stats.html">📊 Stats</a></li>
         </ul>
     </aside>
-
     <main class="content">
-      <header>
-        <h1>Welcome Back, Champion!</h1>
-        <p id="date"></p>
-      </header>
+  <header>
+    <h1>Welcome Back, Champion!</h1>
+    <p id="date"></p>
+  </header>
 
-      <section class="cards">
-        <div class="card">
-          <h3>Account Balance</h3>
-          <p class="value">$10,000</p>
-        </div>
-        <div class="card">
-          <h3>Total Profit</h3>
-          <p class="value profit">+$1,250</p>
-        </div>
-        <div class="card">
-          <h3>Win Rate</h3>
-          <p class="value">68%</p>
-        </div>
-        <div class="card">
-          <h3>Open Trades</h3>
-          <p class="value">2</p>
-        </div>
-      </section>
-    </main>
-  </div>
+  <section class="cards">
+    <div class="card">
+      <h3>Account Balance</h3>
+      <p class="value" id="accountBalance">$0</p>
+    </div>
 
+    <div class="card">
+      <h3>Total Profit</h3>
+      <p class="value profit" id="totalProfit">+$0</p>
+    </div>
+
+    <div class="card">
+      <h3>Win Rate</h3>
+      <p class="value" id="winRate">0%</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Trades</h3>
+      <p class="value" id="totalTrades">0</p>
+    </div>
+  </section>
+</main>
+  
   <script>
     document.getElementById("date").textContent =
       new Date().toLocaleDateString("en-GB", {
@@ -57,5 +58,6 @@
       });
   </script>
   <script src="scripts.js" defer></script>
+  <script src="dashboard.js"defer></script>
 </body>
 </html>

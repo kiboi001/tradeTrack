@@ -551,3 +551,20 @@ body {
   border: none;
   box-shadow: 0 0 10px rgba(0,170,255,0.5);
 }
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+input, textarea, select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
