@@ -1,46 +1,46 @@
-// dashboard.js
-document.addEventListener("DOMContentLoaded", () => {
-  function findEl(...ids) {
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (el) return el;
+// dashboard.js (FINAL)
+document.addEventListener('DOMContentLoaded', () => {
+  function find(...ids) {
+    for (const i of ids) {
+      const e = document.getElementById(i);
+      if (e) return e;
     }
     return null;
   }
 
-  // DOM targets (support multiple naming conventions)
-  const accountBalanceEl = findEl("accountBalance", "account-balance", "accountBalanceEl", "account-balance-el", "account-balance");
-  const totalProfitEl = findEl("totalProfit", "total-profit", "total-profit-el");
-  const winRateEl = findEl("winRate", "win-rate", "win-rate-el");
-  const openTradesEl = findEl("openTrades", "open-trades", "open-trades-el");
+  const acctEl = find('accountBalance','account-balance','account-balance-el','account-balance');
+  const profitEl = find('totalProfit','total-profit','total-profit-el');
+  const winRateEl = find('winRate','win-rate','win-rate-el');
+  const openEl = find('openTrades','open-trades','open-trades-el');
 
-  function updateDashboard() {
-    const trades = window.getTrades ? window.getTrades() : JSON.parse(localStorage.getItem('trades') || '[]');
-
-    const totalProfit = trades.reduce((s, t) => s + Number(t.profit || 0), 0);
+  function refresh() {
+    const trades = window.getTrades ? window.getTrades() : [];
+    const totalProfit = trades.reduce((s,t) => s + Number(t.profit || 0), 0);
     const wins = trades.filter(t => Number(t.profit || 0) > 0).length;
     const total = trades.length;
-    const winRate = total ? ((wins / total) * 100).toFixed(1) : 0;
-    const balanceBase = 10000;
-    const accountBalance = balanceBase + totalProfit;
+    const winRate = total ? ((wins/total)*100).toFixed(1) : '0.0';
 
-    if (accountBalanceEl) accountBalanceEl.textContent = `$${Number(accountBalance).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-    if (totalProfitEl) {
-      totalProfitEl.textContent = `${totalProfit >= 0 ? '+' : '-'}$${Math.abs(Number(totalProfit)).toFixed(2)}`;
-      totalProfitEl.className = totalProfit >= 0 ? 'value positive' : 'value negative';
+    // account balance: prefer user-set accountBalance
+    const userBal = window.getAccountBalance ? window.getAccountBalance() : null;
+    const balance = (userBal !== null) ? userBal : (10000 + totalProfit);
+
+    if (acctEl) acctEl.textContent = `$${Number(balance).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    if (profitEl) {
+      profitEl.textContent = `${totalProfit >= 0 ? '+' : '-'}$${Math.abs(totalProfit).toFixed(2)}`;
+      profitEl.className = totalProfit >= 0 ? 'value positive' : 'value negative';
     }
     if (winRateEl) winRateEl.textContent = `${winRate}%`;
-    if (openTradesEl) openTradesEl.textContent = total;
+    if (openEl) openEl.textContent = total;
   }
 
-  // expose for scripts.js to call
-  window.updateDashboard = updateDashboard;
+  // expose for scripts to call
+  window.updateDashboard = refresh;
 
   // initial run
-  updateDashboard();
+  refresh();
 
-  // also listen to storage to refresh automatically when other tabs change
+  // update on storage changes
   window.addEventListener('storage', (e) => {
-    if (e.key === 'trades') updateDashboard();
+    if (e.key === 'trades' || e.key === 'accountBalance') refresh();
   });
 });

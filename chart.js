@@ -1,138 +1,85 @@
-// chart.js
-let profitChartInstance = null;
-let equityChartInstance = null;
-let winRateChartInstance = null;
+// chart.js (FINAL)
+let _profitChart = null;
+let _equityChart = null;
+let _winChart = null;
 
-function getTradesSafe() {
+function safeTrades() {
   try {
-    if (typeof window.getTrades === 'function') return window.getTrades();
-    return JSON.parse(localStorage.getItem('trades') || '[]');
-  } catch {
+    return (typeof window.getTrades === 'function') ? window.getTrades() : JSON.parse(localStorage.getItem('trades') || '[]');
+  } catch (e) {
     return [];
   }
 }
 
-function destroyChart(chart) {
-  try {
-    if (chart && typeof chart.destroy === 'function') chart.destroy();
-  } catch (e) { /* ignore */ }
+function destroy(c) {
+  if (c && typeof c.destroy === 'function') {
+    try { c.destroy(); } catch (e) { /* ignore */ }
+  }
 }
 
-function renderCharts() {
-  const trades = getTradesSafe();
-  // If there's no trade data, clear canvases and return
+function renderAllCharts() {
+  const trades = safeTrades();
   if (!trades || trades.length === 0) {
-    destroyChart(profitChartInstance);
-    destroyChart(equityChartInstance);
-    destroyChart(winRateChartInstance);
-    console.log("chart.js: no trades to render");
+    destroy(_profitChart); destroy(_equityChart); destroy(_winChart);
+    console.log('chart.js: no trades');
     return;
   }
 
-  const labels = trades.map((t, i) => t.date ? t.date : `T${i+1}`);
+  const labels = trades.map((t,i) => t.date || `T${i+1}`);
   const profits = trades.map(t => Number(t.profit || 0));
 
-  // profit per trade (bar)
-  const profitCtx = document.getElementById('profitChart')?.getContext('2d');
-  destroyChart(profitChartInstance);
-  if (profitCtx) {
-    profitChartInstance = new Chart(profitCtx, {
+  // Profit per trade (bar)
+  const pCtx = document.getElementById('profitChart')?.getContext('2d');
+  destroy(_profitChart);
+  if (pCtx) {
+    _profitChart = new Chart(pCtx, {
       type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Profit / Loss',
-          data: profits,
-          backgroundColor: profits.map(p => p >= 0 ? 'rgba(0,230,118,0.6)' : 'rgba(255,82,82,0.6)'),
-          borderColor: profits.map(p => p >= 0 ? '#00E676' : '#FF5252'),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: '#cfe8ff' } },
-          y: { ticks: { color: '#cfe8ff' } }
-        }
-      }
+      data: { labels, datasets: [{ label:'P/L', data: profits, backgroundColor: profits.map(v => v>=0 ? 'rgba(0,230,118,0.6)' : 'rgba(255,82,82,0.6)'), borderColor: profits.map(v => v>=0 ? '#00E676' : '#FF5252'), borderWidth:1 }]},
+      options: { responsive:true, scales: { x:{ ticks:{ color:'#ccc'} }, y:{ ticks:{ color:'#ccc'} } }, plugins:{ legend:{ display:false } } }
     });
   }
 
-  // equity curve (cumulative)
-  const equityCtx = document.getElementById('equityChart')?.getContext('2d');
-  destroyChart(equityChartInstance);
-  if (equityCtx) {
-    let cumulative = 10000; // starting balance - you can change or make dynamic
-    const equity = profits.map(p => (cumulative += Number(p)));
-    equityChartInstance = new Chart(equityCtx, {
+  // Equity curve
+  const eCtx = document.getElementById('equityChart')?.getContext('2d');
+  destroy(_equityChart);
+  if (eCtx) {
+    const startBal = (typeof window.getAccountBalance === 'function' && window.getAccountBalance() !== null) ? window.getAccountBalance() : 10000;
+    const equity = [];
+    let bal = Number(startBal);
+    for (const p of profits) { bal += Number(p); equity.push(Number(bal.toFixed(2))); }
+
+    _equityChart = new Chart(eCtx, {
       type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Equity',
-          data: equity,
-          borderColor: '#00C3FF',
-          backgroundColor: 'rgba(0,195,255,0.12)',
-          fill: true,
-          tension: 0.25
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: '#cfe8ff' } },
-          y: { ticks: { color: '#cfe8ff' } }
-        }
-      }
+      data: { labels, datasets: [{ label:'Equity', data: equity, borderColor:'#00C3FF', backgroundColor:'rgba(0,195,255,0.12)', fill:true, tension:0.2 }]},
+      options: { responsive:true, scales:{ x:{ ticks:{ color:'#ccc'} }, y:{ ticks:{ color:'#ccc'} } }, plugins:{ legend:{ display:false } } }
     });
   }
 
-  // win rate (doughnut)
-  const winRateCtx = document.getElementById('winRateChart')?.getContext('2d');
-  destroyChart(winRateChartInstance);
-  if (winRateCtx) {
+  // Win rate doughnut
+  const wCtx = document.getElementById('winRateChart')?.getContext('2d');
+  destroy(_winChart);
+  if (wCtx) {
     const wins = profits.filter(p => p > 0).length;
     const losses = profits.filter(p => p < 0).length;
-    winRateChartInstance = new Chart(winRateCtx, {
+    _winChart = new Chart(wCtx, {
       type: 'doughnut',
-      data: {
-        labels: ['Wins', 'Losses'],
-        datasets: [{
-          data: [wins, losses],
-          backgroundColor: ['#00E676', '#FF5252']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { labels: { color: '#fff' } } }
-      }
+      data: { labels:['Wins','Losses'], datasets:[{ data:[wins, losses], backgroundColor:['#00E676','#FF5252'] }]},
+      options: { responsive:true, plugins:{ legend:{ labels:{ color:'#fff' } } } }
     });
   }
 }
 
-// Expose updateCharts
-window.updateCharts = function () {
-  try {
-    renderCharts();
-  } catch (err) {
-    console.error("Error rendering charts:", err);
-  }
-};
+window.updateCharts = function () { try { renderAllCharts(); } catch (e) { console.error(e); } };
 
-// Auto-run on load
+// auto-init after DOM
 document.addEventListener('DOMContentLoaded', () => {
-  // Delay a tick to allow scripts.js to initialize trades if it runs first
-  setTimeout(() => {
-    window.updateCharts();
-  }, 50);
+  // ensure scripts.js loaded and available
+  setTimeout(() => window.updateCharts && window.updateCharts(), 60);
 });
 
-// Listen for storage changes (other tabs)
+// keep charts updated across tabs
 window.addEventListener('storage', (e) => {
-  if (e.key === 'trades') {
-    try { trades = JSON.parse(e.newValue || '[]'); } catch { trades = []; }
-    window.updateCharts();
+  if (e.key === 'trades' || e.key === 'accountBalance') {
+    window.updateCharts && window.updateCharts();
   }
 });
