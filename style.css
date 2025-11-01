@@ -29,7 +29,7 @@ body {
   backdrop-filter: blur(10px);
   border-right: 1px solid rgba(0, 153, 255, 0.3);
   padding: 30px 20px;
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
@@ -602,4 +602,5 @@ input, textarea, select {
     color: #9ecbff;
   
   }
+
 
