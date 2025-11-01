@@ -29,7 +29,7 @@ body {
   backdrop-filter: blur(10px);
   border-right: 1px solid rgba(0, 153, 255, 0.3);
   padding: 30px 20px;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
 }
@@ -39,8 +39,8 @@ body {
 }
 
 .sidebar .logo img {
-  width: 60px;
-  border-radius: 50%;
+  width: 30px;
+  border-radius: 20%;
   margin-bottom: 10px;
 }
 
@@ -602,3 +602,4 @@ input, textarea, select {
     color: #9ecbff;
   
   }
+
