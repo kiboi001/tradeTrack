@@ -581,9 +581,10 @@ input, textarea, select {
     flex-direction: column;
     align-items: flex-start;
     background: #1c2541;
-    width: auto;
-    position: absolute;
-    top : 60px;
+    width: 100%;
+    padding: 15px 15px ;
+    position: absolute ;
+    top: 60px;
     left: 0;
     max-height: 0;
     overflow: hidden;
@@ -602,5 +603,31 @@ input, textarea, select {
     color: #9ecbff;
   
   }
+
+    #trade-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #trade-form input,
+    #trade-form select,
+    #trade-form textarea {
+        width: 100% !important;
+        min-width: unset;
+    }
+    
+    /* Make Add Trade button full width */
+    #trade-form button {
+        width: 100%;
+    }
+    
+    /* Reduce container padding */
+    .journal-container {
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    
+
 
 
