@@ -151,7 +151,7 @@ body {
 
 /* ========== NAVBAR / SIDEBAR ========== */
 .navbar {
-  width: 100%;
+  width: fit-content;
   background: rgba(15, 17, 25, 0.9);
   border-bottom: 1px solid rgba(0, 153, 255, 0.3);
   display: flex;
@@ -552,11 +552,12 @@ body {
   box-shadow: 0 0 10px rgba(0,170,255,0.5);
 }
 .container {
-  width: 100%;
+  width: fit-content;
   max-width: 600px;
   margin: auto;
   padding: 15px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 body {
@@ -580,7 +581,7 @@ input, textarea, select {
     flex-direction: column;
     align-items: flex-start;
     background: #1c2541;
-    width: 100%;
+    width: auto;
     position: absolute;
     top : 60px;
     left: 0;
