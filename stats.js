@@ -3,15 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const totalTrades = trades.length;
   const totalProfit = trades.reduce((sum, t) => sum + Number(t.result), 0);
-  const wins = trades.filter(t => Number(t.result) > 0).length;
+  const profit = Number(trade.profits);
+  return acc + (isNaN(profit) ? 0 : profit ); },0);
+  const wins = trades.filter(t => Number(t.profit) > 0).length;
   const losses = trades.filter(t => Number(t.result) < 0).length;
   const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : 0;
+  const avgRR = trades.length ? ( trades.reduce ((acc , t) => acc + (Number(t.rr) || 0),0) / trades.length ).toFixed(2) : 0;
 
   // Update stat cards
-  document.getElementById("total-trades").textContent = totalTrades;
-  document.getElementById("total-profit").textContent = `$${totalProfit.toFixed(2)}`;
-  document.getElementById("winning-trades").textContent = wins;
-  document.getElementById("win-rate").textContent = `${winRate}%`;
+  document.getElementById("total-trades").innerText = totalTrades;
+  document.getElementById("total-profit").innerText = `$${totalProfit.toFixed(2)}`;
+  document.getElementById("averageRR").innerText = '1:${avgRR};
+  document.getElementById("win-rate").innerText= `${winRate}%`;
 
   // Chart.js setup
   const ctx1 = document.getElementById("profitChart").getContext("2d");
@@ -83,3 +86,4 @@ document.addEventListener("DOMContentLoaded", () => {
     options: { plugins: { legend: { labels: { color: "#fff" } } } }
   });
 });
+
