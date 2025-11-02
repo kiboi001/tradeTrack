@@ -8,7 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const wins = trades.filter(t => Number(t.profit) > 0).length;
   const losses = trades.filter(t => Number(t.result) < 0).length;
   const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : 0;
-  const avgRR = trades.length ? ( trades.reduce ((acc , t) => acc + (Number(t.rr) || 0),0) / trades.length ).toFixed(2) : 0;
+  const avgRR = trades.length ? (
+    trades.reduce ((acc , t) => acc + (Number(t.rr) || 0),0) / trades.length
+  ).toFixed(2)
+    : 0;
 
   // Update stat cards
   document.getElementById("total-trades").innerText = totalTrades;
@@ -86,4 +89,5 @@ document.addEventListener("DOMContentLoaded", () => {
     options: { plugins: { legend: { labels: { color: "#fff" } } } }
   });
 });
+
 
