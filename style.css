@@ -89,53 +89,7 @@ html, body {
   box-shadow: 0 0 10px rgba(0, 153, 255, 0.2);
 }
 
-/* ================= NAVBAR ================= */
-.navbar {
-  background: rgba(15, 17, 25, 0.9);
-  border-bottom: 1px solid rgba(0, 153, 255, 0.3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 40px;
-  backdrop-filter: blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
 
-.navbar .logo {
-  font-size: 1.6em;
-  font-weight: 700;
-  color: #fff;
-}
-
-.navbar img.logo-image {
-  width: 45px;
-  border-radius: 50%;
-  margin-left: 15px;
-}
-
-.navbar ul {
-  list-style: none;
-  display: flex;
-  gap: 25px;
-}
-
-.navbar ul li a {
-  text-decoration: none;
-  color: #ccc;
-  font-size: 1.05em;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition: 0.3s;
-}
-
-.navbar ul li a:hover,
-.navbar ul li a.active {
-  background: linear-gradient(90deg, rgba(0, 153, 255, 0.15), rgba(0, 153, 255, 0.4));
-  color: #00aaff;
-  box-shadow: 0 0 10px rgba(0, 153, 255, 0.3);
-}
 
 /* ================= DASHBOARD ================= */
 .dashboard {
@@ -250,27 +204,7 @@ html, body {
   box-shadow: 0 0 15px rgba(0, 153, 255, 0.3);
 }
 
-/* ================= JOURNAL TABLE ================= */
-#journal-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 25px;
-}
 
-#journal-table th, #journal-table td {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid rgba(0, 153, 255, 0.2);
-}
-
-#journal-table th {
-  background: rgba(0, 153, 255, 0.1);
-  color: #00aaff;
-}
-
-#journal-table tr:hover {
-  background: rgba(0, 153, 255, 0.08);
-}
 
 /* ================= STATS PAGE ================= */
 .stats-page {
@@ -324,5 +258,105 @@ html, body {
   .journal-container {
     padding: 15px;
     margin-top: 20px;
+  }
+}
+
+/* === NAVBAR FIX === */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 15, 25, 0.95);
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #00aaff;
+}
+
+/* MOBILE NAVBAR */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: space-around;
+    margin-top: 8px;
+  }
+}
+
+/* === MAIN CONTAINER FIX === */
+.container {
+  max-width: 95%;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.2);
+  overflow-x: auto; /* prevents table cutoff */
+}
+
+/* === TABLE FIX === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+  text-align: left;
+  min-width: 600px; /* ensures table scrolls if needed */
+}
+
+th, td {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+th {
+  background: rgba(0, 170, 255, 0.2);
+  font-weight: 600;
+}
+
+/* Scrollable on mobile */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  th, td {
+    padding: 10px 8px;
+    font-size: 14px;
   }
 }
