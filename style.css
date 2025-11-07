@@ -629,6 +629,33 @@ input, textarea, select {
     
     
 
+/* Make sure content fits inside viewport */
+.container, .stats-container {
+  width: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  box-sizing: border-box;
+}
 
+/* Fix mobile table overflow */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  display: block;
+}
 
-ChatGPT can make m
+@media (max-width: 768px) {
+  .navbar a {
+    font-size: 0.9rem;
+  }
+  h1, h2 {
+    font-size: 1.3rem;
+  }
+  .card {
+    width: 100%;
+  }
+}
+
