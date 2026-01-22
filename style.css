@@ -553,11 +553,19 @@ td.pnl.negative {
 
   /* Show Toggle Buttons */
   .menu-toggle {
-    display: block;
+    display: block !important;
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 15px;
+    right: 15px;
+    /* Moved to right for better thumb reach */
+    left: auto;
     z-index: 2000;
+  }
+
+  .navbar .menu-toggle {
+    position: relative;
+    top: auto;
+    right: auto;
   }
 
   /* Navbar (Stats/Journal) Mobile */
@@ -566,18 +574,24 @@ td.pnl.negative {
     top: 100%;
     left: 0;
     width: 100%;
-    background: #0a0a0f;
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(20px);
     flex-direction: column;
     align-items: center;
-    padding: 20px 0;
+    padding: 0;
     border-bottom: 1px solid var(--border);
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    visibility: hidden;
   }
 
   .nav-links.show {
-    max-height: 300px;
+    max-height: 400px;
+    padding: 20px 0;
+    opacity: 1;
+    visibility: visible;
   }
 
   /* Forms */
@@ -602,7 +616,22 @@ td.pnl.negative {
   /* Stats/Journal specific adjustments */
   .navbar .menu-toggle {
     position: static;
-    /* Let it sit in navbar flow */
+  }
+
+  .nav-logo,
+  .logo {
+    max-width: 70%;
+  }
+
+  /* Fix background overflow */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .layout {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
