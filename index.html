@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TradeTrackFX Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <div class="layout">
-    <aside class="sidebar">
+    <button class="menu-toggle" id="sidebarToggle">☰</button>
+    <aside class="sidebar" id="sidebar">
       <div class="logo">
         <img src="2.jpg" alt="TradeTrackFX" />
         <h2>TradeTrack<span>FX</span></h2>
@@ -17,47 +20,98 @@
         <li><a href="index.html" class="active">🏠 Dashboard</a></li>
         <li><a href="journal.html">📓 Journal</a></li>
         <li><a href="stats.html">📊 Stats</a></li>
-        </ul>
+      </ul>
+      <button onclick="window.resetAllData()" class="reset-btn" style="margin-top: auto;">
+        <span>🗑️</span> Reset Data
+      </button>
     </aside>
     <main class="content">
-  <header>
-    <h1>Welcome Back, Champion!</h1>
-    <p id="date"></p>
-  </header>
+      <header>
+        <h1>Welcome Back, Champion!</h1>
+        <p id="date"></p>
+      </header>
 
-  <section class="cards">
-    <div class="card">
-      <h3>Account Balance</h3>
-      <p class="value" id="accountBalance">$0</p>
-    </div>
+      <section class="cards">
+        <div class="card">
+          <h3>Account Balance</h3>
+          <p class="value" id="accountBalance">$0.00</p>
+          <div class="balance-input-container" style="margin-top: 10px; font-size: 0.8em;">
+            <label for="initialBalanceInput" style="color: #888;">Initial:</label>
+            <input type="number" id="initialBalanceInput" placeholder="Set Initial Balance"
+              style="background: transparent; border: 1px solid #444; color: white; padding: 2px 5px; width: 80px; border-radius: 4px;">
+          </div>
+        </div>
 
-    <div class="card">
-      <h3>Total Profit</h3>
-      <p class="value profit" id="totalProfit">+$0</p>
-    </div>
+        <div class="card">
+          <h3>Total Profit</h3>
+          <p class="value profit" id="totalProfit">+$0</p>
+        </div>
 
-    <div class="card">
-      <h3>Win Rate</h3>
-      <p class="value" id="winRate">0%</p>
-    </div>
+        <div class="card">
+          <h3>Win Rate</h3>
+          <p class="value" id="winRate">0%</p>
+        </div>
 
-    <div class="card">
-      <h3>Total Trades</h3>
-      <p class="value" id="totalTrades">0</p>
-    </div>
-  </section>
-</main>
-  
-  <script>
-    document.getElementById("date").textContent =
-      new Date().toLocaleDateString("en-GB", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-  </script>
-  <script src="scripts.js" defer></script>
-  <script src="dashboard.js"defer></script>
+        <div class="card">
+          <h3>Total Trades</h3>
+          <p class="value" id="totalTrades">0</p>
+        </div>
+      </section>
+
+      <!-- Transaction Management Section -->
+      <section style="margin-top: 3rem;">
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.8rem;">💰 Withdrawals & Deposits</h2>
+
+        <!-- Transaction Form -->
+        <form id="transaction-form"
+          style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <select id="transactionType" required
+            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
+            <option value="withdrawal">Withdrawal</option>
+            <option value="deposit">Deposit</option>
+          </select>
+          <input type="number" id="transactionAmount" placeholder="Amount ($)" required step="0.01"
+            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
+          <input type="date" id="transactionDate" required
+            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
+          <input type="text" id="transactionNotes" placeholder="Notes (optional)"
+            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px; grid-column: span 2;">
+          <button type="submit"
+            style="background: linear-gradient(135deg, var(--primary), #0077cc); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer;">Add
+            Transaction</button>
+        </form>
+
+        <!-- Transaction Log -->
+        <div style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+          <h3 style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">
+            Recent Transactions</h3>
+          <div id="transaction-log" style="max-height: 300px; overflow-y: auto;">
+            <p style="color: #888; text-align: center;">No transactions yet</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      document.getElementById("date").textContent =
+        new Date().toLocaleDateString("en-GB", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+      // Sidebar toggle logic
+      const toggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      if (toggle && sidebar) {
+        toggle.addEventListener('click', () => {
+          sidebar.classList.toggle('active');
+        });
+      }
+    </script>
+    <script src="scripts.js" defer></script>
+    <script src="dashboard.js" defer></script>
 </body>
+
 </html>

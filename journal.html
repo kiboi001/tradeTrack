@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Journal</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="gallery-styles.css">
 </head>
+
 <body>
   <!-- Navbar -->
   <nav class="navbar">
@@ -13,9 +16,11 @@
       <img src="2.jpg" alt="logo" class="logo-image">
       <span class="logo-text">TradeTrackFX</span>
     </div>
+    <button class="menu-toggle" id="navToggle" style="display: none;">☰</button>
     <ul class="nav-links">
       <li><a href="index.html">Dashboard</a></li>
-            <li><a href="stats.html">Stats</a></li>
+      <li><a href="stats.html">Stats</a></li>
+      <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
     </ul>
   </nav>
 
@@ -26,6 +31,16 @@
     <form id="trade-form">
       <input type="text" id="pair" placeholder="Currency Pair (e.g., XAUUSD)" required>
       <input type="text" id="lot" placeholder="Lot Size" required>
+      <select id="direction" required>
+        <option value="buy">📈 Buy</option>
+        <option value="sell">📉 Sell</option>
+      </select>
+      <input type="time" id="entryTime" placeholder="Entry Time">
+      <input type="time" id="exitTime" placeholder="Exit Time">
+      <input type="number" id="rr" placeholder="RR Ratio (e.g. 2 for 1:2)" step="0.1" required>
+      <input type="text" id="strategy" placeholder="Strategy/Tag (e.g. Breakout)">
+      <input type="file" id="screenshot" accept="image/*"
+        style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; color: #8899a6;">
       <select id="result">
         <option value="win">Win</option>
         <option value="loss">Loss</option>
@@ -34,6 +49,8 @@
       <input type="date" id="date" required>
       <textarea id="notes" placeholder="Notes (optional)"></textarea>
       <button type="submit">Add Trade</button>
+      <button type="button" onclick="window.exportToCSV()"
+        style="background: linear-gradient(135deg, #00ff88, #00cc66);">📥 Export CSV</button>
     </form>
 
     <table id="journal-table">
@@ -41,7 +58,11 @@
         <tr>
           <th>Date</th>
           <th>Pair</th>
+          <th>Direction</th>
+          <th>Duration</th>
           <th>Lot</th>
+          <th>Strategy</th>
+          <th>RR (1:x)</th>
           <th>Result</th>
           <th>P/L ($)</th>
           <th>Notes</th>
@@ -75,8 +96,22 @@
     </div>
   </section>
 
-  <script src="scripts.js" defer></script>
-  <script src="journal.js" defer></script>
-</body>
-</html>
+  <!-- Screenshot Gallery Section -->
+  <section class="gallery-section">
+    <h2>📸 Screenshot Gallery</h2>
+    <div class="gallery-grid" id="gallery-grid">
+      <p style="color: #888; grid-column: 1/-1;">No screenshots yet.</p>
+    </div>
+  </section>
 
+  <!-- Image Modal -->
+  <div id="imgModal" class="modal">
+    <span class="modal-close" onclick="document.getElementById('imgModal').style.display='none'">&times;</span>
+    <img class="modal-content" id="modalImg">
+    <div class="modal-details" id="modalCaption"></div>
+  </div>
+
+  <script src="scripts.js" defer></script>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,15 +9,18 @@
   <link rel="stylesheet" href="stats.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
   <!-- ✅ NAVBAR -->
   <nav class="navbar">
     <div class="logo">TradeTrack<span>FX</span></div>
+    <button class="menu-toggle" id="navToggle" style="display: none;">☰</button>
     <ul class="nav-links">
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="journal.html">Journal</a></li>
-                </ul>
+      <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
+    </ul>
   </nav>
 
   <!-- ✅ MAIN SECTION -->
@@ -24,7 +28,7 @@
     <h1>Your Trading Statistics</h1>
     <p class="subtext">Track your performance, visualize your progress, and stay consistent.</p>
 
-   
+
 
     <!-- ✅ STATS OVERVIEW -->
     <div class="stats-grid">
@@ -52,6 +56,26 @@
         <h3>Best Trade</h3>
         <p id="best-trade">$0</p>
       </div>
+      <div class="stat-card">
+        <h3>Best Trade</h3>
+        <p id="best-trade">$0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Max Drawdown</h3>
+        <p id="max-drawdown">$0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Profit Factor</h3>
+        <p id="profit-factor">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Win Streak</h3>
+        <p id="win-streak">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Loss Streak</h3>
+        <p id="loss-streak">0</p>
+      </div>
     </div>
 
     <!-- ✅ FILTER OPTIONS -->
@@ -67,6 +91,11 @@
           <option value="">All Results</option>
           <option value="win">Wins</option>
           <option value="loss">Losses</option>
+        </select>
+        <select id="filter-direction">
+          <option value="">All Directions</option>
+          <option value="buy">Buy</option>
+          <option value="sell">Sell</option>
         </select>
         <button id="apply-filter">Apply</button>
         <button id="reset-filter" class="reset">Reset</button>
@@ -88,15 +117,22 @@
 
   </section>
 
+  <!-- Trading Calendar Section -->
+  <section style="margin-top: 3rem; padding: 0 2rem;">
+    <h2 style="margin-bottom: 1.5rem; font-size: 1.8rem;">📅 Trading Calendar</h2>
+    <div id="trading-calendar"
+      style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);"></div>
+  </section>
+
   <footer>
     <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
   </footer>
   <script src="scripts.js" defer></script>
   <script src="chart.js" defer></script>
   <script src="stats.js" defer></script>
+  <script src="calendar.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="calendar-styles.css">
 </body>
 
 </html>
-
-

@@ -1,23 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
   const trades = JSON.parse(localStorage.getItem("trades") || "[]");
 
-  const totalTrades = trades.length;
-  const totalProfit = trades.reduce((sum, t) => sum + Number(t.result), 0);
-  const profit = Number(trade.profits);
-  return acc + (isNaN(profit) ? 0 : profit ); },0);
-  const wins = trades.filter(t => Number(t.profit) > 0).length;
-  const losses = trades.filter(t => Number(t.result) < 0).length;
-  const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : 0;
-  const avgRR = trades.length ? (
-    trades.reduce ((acc , t) => acc + (Number(t.rr) || 0),0) / trades.length
-  ).toFixed(2)
-    : 0;
+  // Chart Tab Switching Logic
+  const profitChartCanvas = document.getElementById('profitChart');
+  const equityChartCanvas = document.getElementById('equityChart');
+  const winRateChartCanvas = document.getElementById('winRateChart');
 
-  // Update stat cards
-  document.getElementById("total-trades").innerText = totalTrades;
-  document.getElementById("total-profit").innerText = `$${totalProfit.toFixed(2)}`;
-  document.getElementById("averageRR").innerText = '1:${avgRR};
-  document.getElementById("win-rate").innerText= `${winRate}%`;
+  // Initially show only profit chart
+  if (profitChartCanvas) profitChartCanvas.style.display = 'block';
+  if (equityChartCanvas) equityChartCanvas.style.display = 'none';
+  if (winRateChartCanvas) winRateChartCanvas.style.display = 'none';
+
+  // Tab button click handlers
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove active class from all
+      tabBtns.forEach(b => b.classList.remove('active'));
+      // Add active to clicked
+      btn.classList.add('active');
+
+      // Hide all charts
+      if (profitChartCanvas) profitChartCanvas.style.display = 'none';
+      if (equityChartCanvas) equityChartCanvas.style.display = 'none';
+      if (winRateChartCanvas) winRateChartCanvas.style.display = 'none';
+
+      // Show selected chart
+      const chartType = btn.dataset.chart;
+      if (chartType === 'profit' && profitChartCanvas) profitChartCanvas.style.display = 'block';
+      else if (chartType === 'equity' && equityChartCanvas) equityChartCanvas.style.display = 'block';
+      else if (chartType === 'winrate' && winRateChartCanvas) winRateChartCanvas.style.display = 'block';
+    });
+  });
 
   // Chart.js setup
   const ctx1 = document.getElementById("profitChart").getContext("2d");
