@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top right, #1a1a2e, #16213e);
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .auth-card p {
+            color: #8899a6;
+            margin-bottom: 30px;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .auth-form button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), #0077cc);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .auth-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        .toggle-auth {
+            margin-top: 20px;
+            color: #8899a6;
+            font-size: 0.9rem;
+        }
+
+        .toggle-auth span {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logo-box {
+            margin-bottom: 20px;
+        }
+
+        .logo-box img {
+            width: 60px;
+            border-radius: 12px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .google-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #8899a6;
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-box">
+                <img src="2.jpg" alt="TradeTrackFX">
+            </div>
+            <h2 id="auth-title">Welcome Back</h2>
+            <p id="auth-subtitle">Log in to your trading journal</p>
+
+            <form class="auth-form" id="auth-form">
+                <input type="email" id="email" placeholder="Email Address" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" id="submit-btn">Log In</button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <button class="google-btn" onclick="window.authGoogleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+
+            <div class="toggle-auth">
+                <span id="toggle-text">Don't have an account? <span onclick="toggleMode()">Sign Up</span></span>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <button onclick="checkConnection()"
+                    style="background: none; border: 1px solid rgba(255,255,255,0.1); color: #555; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; cursor: pointer;">🛠️
+                    Check Connection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        let isLoginMode = true;
+
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').textContent = isLoginMode ? 'Welcome Back' : 'Create Account';
+            document.getElementById('auth-subtitle').textContent = isLoginMode ? 'Log in to your trading journal' : 'Start tracking your journey today. Become a winnner now!';
+            document.getElementById('submit-btn').textContent = isLoginMode ? 'Log In' : 'Sign Up';
+            document.getElementById('toggle-text').innerHTML = isLoginMode
+                ? 'Don\'t have an account? <span onclick="toggleMode()">Sign Up</span>'
+                : 'Already have an account? <span onclick="toggleMode()">Log In</span>';
+        }
+
+        document.getElementById('auth-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (typeof window.authLogin !== 'function') {
+                alert("Login Error: The auth script hasn't loaded properly yet. Try refreshing.");
+                return;
+            }
+
+            if (isLoginMode) {
+                window.authLogin(email, password);
+            } else {
+                window.authSignup(email, password);
+            }
+        });
+
+        function checkConnection() {
+            if (typeof firebase === 'undefined') {
+                alert("❌ Firebase SDK: NOT LOADED");
+            } else if (typeof auth === 'undefined' || !auth) {
+                alert("❌ Firebase Auth: NOT INITIALIZED (Check API Key)");
+            } else {
+                alert("✅ Firebase is CONNECTED correctly!");
+            }
+        }
+    </script>
+</body>
+
+</html>

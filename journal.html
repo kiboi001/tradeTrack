@@ -20,6 +20,7 @@
     <ul class="nav-links">
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="stats.html">Stats</a></li>
+      <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
       <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
     </ul>
   </nav>
@@ -110,6 +111,14 @@
     <img class="modal-content" id="modalImg">
     <div class="modal-details" id="modalCaption"></div>
   </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
 
   <script src="scripts.js" defer></script>
 </body>

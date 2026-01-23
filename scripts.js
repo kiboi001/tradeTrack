@@ -11,36 +11,40 @@
   const INIT_BAL_KEY = 'initialBalance';
   const TRANSACTIONS_KEY = 'transactions'; // NEW
 
+  // ---------- Local State Cache ----------
+  let TRADES = [];
+  let TRANSACTIONS = [];
+  let INITIAL_BALANCE = 0;
+  let isFirebaseReady = false;
+  let CURRENT_USER_ID = null;
+
+  // Global init function called by auth.js
+  window.initAppWithUser = function (userId) {
+    CURRENT_USER_ID = userId;
+    initFirebaseSync();
+  };
+
   // load trades safely
   function readTrades() {
-    try {
-      const raw = localStorage.getItem(TRADES_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) {
-      console.error('readTrades parse error', e);
-      return [];
+    return TRADES;
+  }
+
+  async function saveTrades(arr) {
+    if (!isFirebaseReady) return;
+    // We update the whole collection or individual docs? 
+    // Usually better to update individual docs in addOrUpdateTrade.
+    // But if normalizeTrade/saveTrades is used for bulk, we handle it:
+    for (const t of arr) {
+      await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(t.id).set(t);
     }
   }
 
-  function saveTrades(arr) {
-    try {
-      localStorage.setItem(TRADES_KEY, JSON.stringify(arr));
-      // notify everything
-      updateAllViews();
-    } catch (e) {
-      console.error('saveTrades error', e);
-    }
-  }
-
-  // normalize trade shape (including RR)
+  // normalize trade shape
   function normalizeTrade(raw) {
     const profitNum = parseFloat(raw.profit ?? raw.result ?? 0);
-    // if status provided and equals 'loss', force negative
     let profit = Number.isFinite(profitNum) ? profitNum : 0;
-    if (raw.status && String(raw.status).toLowerCase() === 'loss') profit = -Math.abs(profit); // defensive check
+    if (raw.status && String(raw.status).toLowerCase() === 'loss') profit = -Math.abs(profit);
 
-    // Status Logic
     const status = raw.status
       ? String(raw.status)
       : (profit < 0 ? 'loss' : 'win');
@@ -49,9 +53,9 @@
       id: raw.id || Date.now().toString(),
       pair: raw.pair || '',
       lot: raw.lot || '',
-      direction: raw.direction || 'buy', // NEW: buy or sell
-      entryTime: raw.entryTime || '', // NEW: entry time
-      exitTime: raw.exitTime || '', // NEW: exit time
+      direction: raw.direction || 'buy',
+      entryTime: raw.entryTime || '',
+      exitTime: raw.exitTime || '',
       rr: parseFloat(raw.rr) || 0,
       strategy: raw.strategy || '',
       screenshot: raw.screenshot || null,
@@ -63,104 +67,150 @@
   }
 
   // Public API: add or update
-  function addOrUpdateTrade(raw, tradeId = null) {
-    const trades = readTrades();
+  async function addOrUpdateTrade(raw, tradeId = null) {
     const t = normalizeTrade(raw);
-    if (tradeId) {
-      const idx = trades.findIndex(x => x.id === tradeId);
-      if (idx >= 0) { trades[idx] = { ...trades[idx], ...t }; }
-      else trades.push(t);
-    } else trades.push(t);
-    saveTrades(trades);
-  }
-
-  function deleteTrade(idToRemove) {
-    const trades = readTrades().filter(t => t.id !== idToRemove);
-    saveTrades(trades);
-  }
-
-  // expose getter for other scripts
-  window.getTrades = function () { return readTrades(); };
-  window.addOrUpdateTrade = addOrUpdateTrade;
-  window.deleteTrade = deleteTrade;
-
-  // ---------- Transaction Management (Withdrawals/Deposits) ----------
-  function readTransactions() {
-    try {
-      const raw = localStorage.getItem(TRANSACTIONS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) {
-      console.error('readTransactions error', e);
-      return [];
+    if (tradeId) t.id = tradeId;
+    if (isFirebaseReady && CURRENT_USER_ID) {
+      // If we have a local base64 image, upload to Storage first
+      if (t.screenshot && t.screenshot.startsWith('data:image')) {
+        try {
+          const storageRef = storage.ref(`trades/${CURRENT_USER_ID}/${t.id}.png`);
+          const snapshot = await storageRef.putString(t.screenshot, 'data_url');
+          t.screenshot = await snapshot.ref.getDownloadURL();
+        } catch (err) {
+          console.error('Storage upload failed', err);
+        }
+      }
+      await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(t.id).set(t);
+    } else {
+      // fallback to local for now if firebase not ready (unlikely after init)
+      console.warn('Firebase not ready, using local storage fallback');
+      const trades = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]');
+      const idx = trades.findIndex(x => x.id === t.id);
+      if (idx >= 0) trades[idx] = t; else trades.push(t);
+      localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
+      TRADES = trades;
+      updateAllViews();
     }
   }
 
-  function saveTransaction(transaction) {
-    const transactions = readTransactions();
+  async function deleteTrade(idToRemove) {
+    if (isFirebaseReady && CURRENT_USER_ID) {
+      await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(idToRemove).delete();
+      // Also try to delete image from storage
+      try {
+        await storage.ref(`trades/${CURRENT_USER_ID}/${idToRemove}.png`).delete();
+      } catch (e) { }
+    } else {
+      const trades = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]').filter(t => t.id !== idToRemove);
+      localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
+      TRADES = trades;
+      updateAllViews();
+    }
+  }
+
+  // expose getter for other scripts
+  window.getTrades = () => TRADES;
+  window.addOrUpdateTrade = addOrUpdateTrade;
+  window.deleteTrade = deleteTrade;
+
+  // ---------- Transaction Management ----------
+  function readTransactions() {
+    return TRANSACTIONS;
+  }
+
+  async function saveTransaction(transaction) {
     const normalized = {
       id: transaction.id || Date.now().toString(),
-      type: transaction.type || 'withdrawal', // 'withdrawal' or 'deposit'
+      type: transaction.type || 'withdrawal',
       amount: parseFloat(transaction.amount) || 0,
       date: transaction.date || new Date().toISOString().split('T')[0],
       notes: transaction.notes || ''
     };
-    transactions.push(normalized);
-    try {
-      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+    if (isFirebaseReady && CURRENT_USER_ID) {
+      await db.collection('users').doc(CURRENT_USER_ID).collection('transactions').doc(normalized.id).set(normalized);
+    } else {
+      const txs = JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) || '[]');
+      txs.push(normalized);
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(txs));
+      TRANSACTIONS = txs;
       updateAllViews();
-    } catch (e) {
-      console.error('saveTransaction error', e);
     }
   }
 
-  function deleteTransaction(idToRemove) {
-    const transactions = readTransactions().filter(t => t.id !== idToRemove);
-    try {
-      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+  async function deleteTransaction(idToRemove) {
+    if (isFirebaseReady && CURRENT_USER_ID) {
+      await db.collection('users').doc(CURRENT_USER_ID).collection('transactions').doc(idToRemove).delete();
+    } else {
+      const txs = JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) || '[]').filter(t => t.id !== idToRemove);
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(txs));
+      TRANSACTIONS = txs;
       updateAllViews();
-    } catch (e) {
-      console.error('deleteTransaction error', e);
     }
   }
 
-  // Expose transaction functions
   window.getTransactions = readTransactions;
   window.saveTransaction = saveTransaction;
   window.deleteTransaction = deleteTransaction;
 
-  // ---------- initial balance ----------
+  // ---------- Settings (Balance) ----------
   function readInitialBalance() {
-    const v = localStorage.getItem(INIT_BAL_KEY);
-    const n = parseFloat(v);
-    // Default to 0 if not set, user should set it
-    return Number.isFinite(n) ? n : 0;
+    return INITIAL_BALANCE;
   }
-  function saveInitialBalance(n) {
+  async function saveInitialBalance(n) {
     if (!Number.isFinite(n)) return;
-    localStorage.setItem(INIT_BAL_KEY, String(n));
-    updateAllViews();
+    INITIAL_BALANCE = n;
+    if (isFirebaseReady && CURRENT_USER_ID) {
+      await db.collection('users').doc(CURRENT_USER_ID).collection('settings').doc('account').set({ initialBalance: n }, { merge: true });
+    } else {
+      localStorage.setItem(INIT_BAL_KEY, String(n));
+      updateAllViews();
+    }
   }
   window.getInitialBalance = readInitialBalance;
   window.setInitialBalance = saveInitialBalance;
 
   // ---------- reset data ----------
-  function resetAllData() {
-    if (!confirm('ARE YOU SURE? This will delete ALL trades and reset your balance. This cannot be undone.')) return;
+  async function resetAllData() {
+    if (!CURRENT_USER_ID) return;
+    if (!confirm('ARE YOU SURE? This will delete ALL trades and reset your balance in the CLOUD. This cannot be undone.')) return;
 
     try {
+      if (isFirebaseReady) {
+        const userRef = db.collection('users').doc(CURRENT_USER_ID);
+
+        // Delete Trades
+        const tradesSnap = await userRef.collection('trades').get();
+        const tradesBatch = db.batch();
+        tradesSnap.forEach(doc => {
+          tradesBatch.delete(doc.ref);
+        });
+        await tradesBatch.commit();
+
+        // Delete Transactions
+        const txSnap = await userRef.collection('transactions').get();
+        const txBatch = db.batch();
+        txSnap.forEach(doc => {
+          txBatch.delete(doc.ref);
+        });
+        await txBatch.commit();
+
+        // Reset settings
+        await userRef.collection('settings').doc('account').delete();
+      }
+
       localStorage.removeItem(TRADES_KEY);
       localStorage.removeItem(INIT_BAL_KEY);
       localStorage.removeItem(TRANSACTIONS_KEY);
-      // Reset input if exists
+
       const balInput = id('initialBalanceInput');
       if (balInput) balInput.value = '';
 
-      updateAllViews();
       alert('All data has been reset.');
+      window.location.reload(); // Refresh to clear local state
     } catch (e) {
       console.error('Reset failed', e);
-      alert('Error resetting data');
+      alert('Error resetting data: ' + e.message);
     }
   }
   window.resetAllData = resetAllData;
@@ -507,9 +557,12 @@
   }
 
   // main updater called after any change
+  // main updater called after any change
   window.updateAllViews = function () {
     renderJournalTable();
     renderGallery();
+    renderTransactionLog();
+    renderRecentTradesDashboard();
     populateFilters();
     updateStatsUI();
     updateDashboardUI();
@@ -552,9 +605,8 @@
     modal.style.display = 'block';
     modalImg.src = trade.screenshot;
 
-    const statusClass = trade.profit > 0 ? 'positive' : 'negative';
-    const statusText = trade.profit > 0 ? 'WIN' : 'LOSS';
     const statusColor = trade.profit > 0 ? '#00E676' : '#FF5252';
+    const statusText = trade.profit > 0 ? 'WIN' : 'LOSS';
 
     caption.innerHTML = `
       <strong style="color: ${statusColor}; font-size: 1.4rem;">${statusText}</strong><br>
@@ -562,6 +614,37 @@
       <span style="color: #8899a6;">Pair:</span> ${trade.pair} | 
       <span style="color: #8899a6;">P/L:</span> <span style="color: ${statusColor}">$${Number(trade.profit || 0).toFixed(2)}</span>
     `;
+  }
+
+  // ---------- Dashboard Recent Trades ----------
+  function renderRecentTradesDashboard() {
+    const logEl = id('recent-trades-log');
+    if (!logEl) return;
+
+    const trades = readTrades().slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+    if (trades.length === 0) {
+      logEl.innerHTML = '<p style="color: #888; text-align: center;">No trades yet</p>';
+      return;
+    }
+
+    logEl.innerHTML = trades.map(t => {
+      const color = t.profit > 0 ? '#00E676' : (t.profit < 0 ? '#FF5252' : '#fff');
+      const sign = t.profit >= 0 ? '+' : '';
+
+      return `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; border-left: 3px solid ${color};">
+          <div>
+            <strong style="color: #fff; font-size: 0.9rem;">${t.pair}</strong>
+            <p style="color: #8899a6; font-size: 0.8rem; margin: 4px 0 0 0;">${t.date} • ${(t.strategy || 'No Strategy')}</p>
+          </div>
+          <div style="text-align: right;">
+            <strong style="color: ${color}; font-size: 1.1rem;">${sign}$${Number(t.profit).toFixed(2)}</strong>
+            <p style="color: #8899a6; font-size: 0.7rem; margin-top: 2px;">${(t.status || '').toUpperCase()}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   // ---------- Transaction Form & Log ----------
@@ -702,11 +785,83 @@
 
   window.getAdvancedMetrics = computeAdvancedMetrics;
 
+  // ---------- Firebase Sync & Migration ----------
+  async function initFirebaseSync() {
+    if (typeof firebase === 'undefined' || !CURRENT_USER_ID) {
+      console.error('Firebase or User ID not ready!');
+      return;
+    }
+    isFirebaseReady = true;
+
+    const userRef = db.collection('users').doc(CURRENT_USER_ID);
+
+    // Listen to Trades
+    userRef.collection('trades').onSnapshot(snap => {
+      TRADES = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      updateAllViews();
+    });
+
+    // Listen to Transactions
+    userRef.collection('transactions').onSnapshot(snap => {
+      TRANSACTIONS = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      updateAllViews();
+    });
+
+    // Listen to Settings
+    userRef.collection('settings').doc('account').onSnapshot(doc => {
+      if (doc.exists) {
+        INITIAL_BALANCE = doc.data().initialBalance || 0;
+        updateAllViews();
+      }
+    });
+
+    // Check for local data to migrate
+    await migrateLocalToFirebase();
+  }
+
+  async function migrateLocalToFirebase() {
+    if (!CURRENT_USER_ID) return;
+    const localTrades = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]');
+    const localTxs = JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) || '[]');
+    const localBal = parseFloat(localStorage.getItem(INIT_BAL_KEY) || '0');
+
+    if (localTrades.length > 0 || localTxs.length > 0 || localBal !== 0) {
+      console.log('Migrating local data to Firebase for user:', CURRENT_USER_ID);
+
+      const userRef = db.collection('users').doc(CURRENT_USER_ID);
+      const batch = db.batch();
+
+      // Migrate Trades
+      for (const t of localTrades) {
+        batch.set(userRef.collection('trades').doc(t.id), t);
+      }
+
+      // Migrate Transactions
+      for (const t of localTxs) {
+        batch.set(userRef.collection('transactions').doc(t.id), t);
+      }
+
+      // Migrate Settings
+      if (localBal !== 0) {
+        batch.set(userRef.collection('settings').doc('account'), { initialBalance: localBal }, { merge: true });
+      }
+
+      await batch.commit();
+      console.log('Migration complete!');
+
+      // Clear local storage so we don't migrate again
+      localStorage.removeItem(TRADES_KEY);
+      localStorage.removeItem(TRANSACTIONS_KEY);
+      localStorage.removeItem(INIT_BAL_KEY);
+    }
+  }
+
   // main updater called after any change
   window.updateAllViews = function () {
     renderJournalTable();
     renderGallery();
     renderTransactionLog();
+    renderRecentTradesDashboard(); // NEW
     populateFilters();
     updateStatsUI();
     updateDashboardUI();
@@ -789,7 +944,9 @@
     };
     initToggles();
 
-    updateAllViews();
+    // Firebase is now initialized via auth.js + initAppWithUser
+    // We don't render until we have a user ID and data
+    console.log("App ready. Waiting for Auth...");
   });
 
   // storage cross-tab

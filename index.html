@@ -21,7 +21,11 @@
         <li><a href="journal.html">📓 Journal</a></li>
         <li><a href="stats.html">📊 Stats</a></li>
       </ul>
-      <button onclick="window.resetAllData()" class="reset-btn" style="margin-top: auto;">
+      <button onclick="window.authLogout()" class="reset-btn"
+        style="margin-top: 10px; background: rgba(255,255,255,0.05); color: #888;">
+        <span>🚪</span> Logout
+      </button>
+      <button onclick="window.resetAllData()" class="reset-btn" style="margin-top: 10px;">
         <span>🗑️</span> Reset Data
       </button>
     </aside>
@@ -55,6 +59,23 @@
         <div class="card">
           <h3>Total Trades</h3>
           <p class="value" id="totalTrades">0</p>
+        </div>
+      </section>
+
+      <!-- Recent Trades Dashboard -->
+      <section style="margin-top: 3rem;">
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.8rem;">📉 Recent Trades</h2>
+        <div style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+          <h3 style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">
+            Latest 5 Performance</h3>
+          <div id="recent-trades-log" style="max-height: 400px; overflow-y: auto;">
+            <p style="color: #888; text-align: center;">No trades recorded yet</p>
+          </div>
+          <div style="text-align: center; margin-top: 15px;">
+            <a href="journal.html"
+              style="color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 600;">View All
+              Journal Entries →</a>
+          </div>
         </div>
       </section>
 
@@ -101,6 +122,14 @@
           day: "numeric",
         });
     </script>
+    <!-- Firebase SDK (Compat version for easier integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
     <script src="scripts.js" defer></script>
     <script src="dashboard.js" defer></script>
 </body>
