@@ -169,16 +169,37 @@ function renderAllCharts(tradesOverride = null) {
 
 // Global update function called by scripts.js
 window.updateCharts = function (tradesOverride = null) {
-  try { renderAllCharts(tradesOverride); } catch (e) { console.error(e); }
+  try {
+    renderAllCharts(tradesOverride);
+  } catch (e) {
+    console.error('Chart update error:', e);
+  }
 };
 
-// auto-init after DOM
-document.addEventListener('DOMContentLoaded', () => {
-  // ensure scripts.js loaded and available
-  setTimeout(() => window.updateCharts && window.updateCharts(), 60);
-});
+// Auto-init - handle both DOMContentLoaded and immediate execution
+function initCharts() {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet, retrying...');
+    setTimeout(initCharts, 100);
+    return;
+  }
 
-// keep charts updated across tabs
+  console.log('Initializing charts...');
+  if (window.updateCharts) {
+    window.updateCharts();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initCharts, 300);
+  });
+} else {
+  // DOM already loaded
+  setTimeout(initCharts, 300);
+}
+
+// Keep charts updated across tabs
 window.addEventListener('storage', (e) => {
   if (e.key === 'trades' || e.key === 'accountBalance') {
     window.updateCharts && window.updateCharts();

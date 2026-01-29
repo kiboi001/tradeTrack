@@ -287,9 +287,19 @@ header p {
 .journal-container,
 .stats-page {
   width: 90%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 40px auto;
   animation: fadeIn 0.5s ease;
+}
+
+.journal-container section,
+.stats-page section {
+  margin-bottom: 2rem;
+}
+
+.journal-stats,
+.gallery-section {
+  margin-top: 2rem;
 }
 
 h1.page-title {
@@ -304,10 +314,32 @@ h1.page-title {
   border-radius: 20px;
   border: 1px solid var(--border);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-bottom: 40px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#trade-form textarea {
+  grid-column: span 3;
+  min-height: 80px;
+  resize: vertical;
+}
+
+#trade-form button[type="submit"],
+#trade-form button[type="button"] {
+  grid-column: span 1;
+}
+
+/* Transaction Form Specific */
+#transaction-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+#transaction-form button {
+  grid-column: span 2;
 }
 
 input,
@@ -320,6 +352,8 @@ textarea {
   border-radius: 10px;
   font-size: 1rem;
   transition: 0.3s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus,
@@ -349,8 +383,23 @@ button:hover {
 /* Table */
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
   border-radius: 20px;
   border: 1px solid var(--border);
+  position: relative;
+}
+
+.table-wrapper table {
+  position: relative;
+}
+
+.table-wrapper thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 table {
@@ -541,6 +590,7 @@ td.pnl.negative {
     height: 100vh;
     width: 260px;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
   }
 
   .sidebar.active {
@@ -548,18 +598,23 @@ td.pnl.negative {
   }
 
   .content {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+    margin-top: 0;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Show Toggle Buttons */
   .menu-toggle {
     display: block !important;
-    position: absolute;
+    position: fixed;
     top: 15px;
     right: 15px;
-    /* Moved to right for better thumb reach */
-    left: auto;
     z-index: 2000;
+    background: rgba(0, 170, 255, 0.2) !important;
+    border: 1px solid var(--primary);
+    padding: 8px 15px !important;
+    border-radius: 8px;
   }
 
   .navbar .menu-toggle {
@@ -594,26 +649,56 @@ td.pnl.negative {
     visibility: visible;
   }
 
-  /* Forms */
+  /* Cards - Better Mobile Grid */
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  /* Forms - Full Width */
   #trade-form {
     grid-template-columns: 1fr;
+    padding: 20px 15px;
+    gap: 12px;
+  }
+
+  #trade-form textarea {
+    grid-column: span 1;
+  }
+
+  #trade-form button {
+    grid-column: span 1;
   }
 
   /* Typography Scale */
-  h1 {
+  h1,
+  h1.page-title {
+    font-size: 1.8rem !important;
+  }
+
+  header h1 {
     font-size: 1.8rem !important;
   }
 
   .card .value {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
   /* Add margin for toggle button space in layout */
   .content header {
-    margin-top: 40px;
+    margin-top: 50px;
+    margin-bottom: 2rem;
   }
 
   /* Stats/Journal specific adjustments */
+  .navbar {
+    padding: 1rem 3%;
+  }
+
   .navbar .menu-toggle {
     position: static;
   }
@@ -623,15 +708,98 @@ td.pnl.negative {
     max-width: 70%;
   }
 
-  /* Fix background overflow */
+  /* Table Improvements */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 800px;
+  }
+
+  th,
+  td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+
+  /* Stats Grid Mobile */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-box,
+  .stat-card {
+    padding: 15px;
+  }
+
+  /* Journal Container */
+  .journal-container,
+  .stats-page {
+    width: 100%;
+    margin: 20px auto;
+    padding: 0 10px;
+  }
+
+  /* Compact Table on Mobile */
+  .table-wrapper {
+    max-height: 400px;
+  }
+
+  /* Better Scrolling */
   body {
     overflow-x: hidden;
     width: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 
   .layout {
     width: 100%;
     overflow-x: hidden;
+  }
+
+  /* Transaction Section Mobile */
+  #transaction-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons */
+  button {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  /* Input Fields */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+  }
+
+  /* Gallery Section */
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 10px;
+  }
+
+  /* Chart Section */
+  .chart-section {
+    height: 300px;
+    padding: 1rem;
+  }
+
+  /* Spacing Improvements */
+  section {
+    margin-bottom: 2rem;
+  }
+
+  /* Reset Button */
+  .reset-btn {
+    font-size: 0.9rem;
+    padding: 10px;
   }
 }
 

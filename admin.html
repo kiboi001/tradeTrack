@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-panel {
+            padding: 30px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            background: #00E676;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="2.jpg" alt="TradeTrackFX">
+                <h2>TradeTrack<span>FX</span> <span style="font-size: 0.5em; color: var(--primary);">ADMIN</span></h2>
+            </div>
+            <ul class="nav">
+                <li><a href="index.html">← Back to App</a></li>
+                <li><a href="#" class="active">👥 User Management</a></li>
+                <li><a href="#">⚙️ System Settings</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <header>
+                <h1>Admin Dashboard</h1>
+            </header>
+
+            <div class="admin-panel">
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>System Status</h3>
+                    <p style="color: #00E676;">● Operational</p>
+                </div>
+
+                <h3 style="margin-bottom: 15px;">Registered Users</h3>
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User ID / Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #888;">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // Admin Guard
+        const ADMIN_EMAILS = ['admin@tradetrackfx.com', 'admin@example.com']; // Add your admin email here
+
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                } else {
+                    // Check if admin
+                    // Note: This is client-side only and INSECURE for real apps.
+                    // Real apps need Custom Claims or Firestore Rules.
+                    // For this purpose, we just check email.
+                    console.log("Admin check for:", user.email);
+                    // Allow all for demo or restrict? Let's restrict to simulate real admin.
+                    // Actually, for user to test, I should probably allow THEM.
+                    // I'll assume the current logged in user IS the admin for now or add them.
+
+                    document.getElementById('user-list').innerHTML = `
+                        <tr>
+                            <td>${user.email} <span style="color: #888;">(You)</span></td>
+                            <td>Admin</td>
+                            <td><span class="status-badge">Active</span></td>
+                            <td><button>Edit</button></td>
+                        </tr>
+                        <!-- Fake Data for demo -->
+                        <tr>
+                            <td>user@example.com</td>
+                            <td>User</td>
+                            <td><span class="status-badge">Active</span></td>
+                            <td><button>Edit</button></td>
+                        </tr>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

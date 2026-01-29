@@ -20,9 +20,17 @@
 
   // Global init function called by auth.js
   window.initAppWithUser = function (userId) {
+    console.log("scripts.js: initAppWithUser called with", userId);
     CURRENT_USER_ID = userId;
     initFirebaseSync();
   };
+
+  // Check if auth.js already found a user before we loaded
+  if (window.pendingUser) {
+    console.log("scripts.js: Found pending user, initializing...");
+    window.initAppWithUser(window.pendingUser.uid);
+    window.pendingUser = null; // clear
+  }
 
   // load trades safely
   function readTrades() {
@@ -71,6 +79,7 @@
     const t = normalizeTrade(raw);
     if (tradeId) t.id = tradeId;
     if (isFirebaseReady && CURRENT_USER_ID) {
+      console.log(`Saving trade ${t.id} to Firebase for user ${CURRENT_USER_ID}...`);
       // If we have a local base64 image, upload to Storage first
       if (t.screenshot && t.screenshot.startsWith('data:image')) {
         try {
@@ -81,7 +90,13 @@
           console.error('Storage upload failed', err);
         }
       }
-      await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(t.id).set(t);
+      try {
+        await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(t.id).set(t);
+        console.log("Trade saved successfully to Firestore.");
+      } catch (e) {
+        console.error("Firestore Save Error:", e);
+        alert("Error saving trade: " + e.message);
+      }
     } else {
       // fallback to local for now if firebase not ready (unlikely after init)
       console.warn('Firebase not ready, using local storage fallback');
@@ -787,36 +802,67 @@
 
   // ---------- Firebase Sync & Migration ----------
   async function initFirebaseSync() {
-    if (typeof firebase === 'undefined' || !CURRENT_USER_ID) {
-      console.error('Firebase or User ID not ready!');
+    console.log("🔄 initFirebaseSync: Starting...");
+
+    if (typeof firebase === 'undefined') {
+      console.error('❌ Firebase SDK not loaded!');
+      alert('Error: Firebase is not loaded. Please refresh the page.');
       return;
     }
+
+    if (!CURRENT_USER_ID) {
+      console.error('❌ No user ID provided to initFirebaseSync');
+      return;
+    }
+
+    if (!db) {
+      console.error('❌ Firestore (db) is not initialized!');
+      alert('Error: Database connection failed. Please refresh the page.');
+      return;
+    }
+
+    console.log(`✅ Firebase ready for user: ${CURRENT_USER_ID}`);
     isFirebaseReady = true;
 
     const userRef = db.collection('users').doc(CURRENT_USER_ID);
 
     // Listen to Trades
+    console.log("👂 Setting up Trades listener...");
     userRef.collection('trades').onSnapshot(snap => {
+      console.log(`📦 Trades snapshot received: ${snap.docs.length} trades`);
       TRADES = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       updateAllViews();
+    }, error => {
+      console.error('❌ Trades listener error:', error);
     });
 
     // Listen to Transactions
+    console.log("👂 Setting up Transactions listener...");
     userRef.collection('transactions').onSnapshot(snap => {
+      console.log(`💰 Transactions snapshot received: ${snap.docs.length} transactions`);
       TRANSACTIONS = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       updateAllViews();
+    }, error => {
+      console.error('❌ Transactions listener error:', error);
     });
 
     // Listen to Settings
+    console.log("👂 Setting up Settings listener...");
     userRef.collection('settings').doc('account').onSnapshot(doc => {
       if (doc.exists) {
         INITIAL_BALANCE = doc.data().initialBalance || 0;
+        console.log(`⚙️ Settings loaded: Initial Balance = $${INITIAL_BALANCE}`);
         updateAllViews();
+      } else {
+        console.log("⚙️ No settings document found, using default balance");
       }
+    }, error => {
+      console.error('❌ Settings listener error:', error);
     });
 
     // Check for local data to migrate
     await migrateLocalToFirebase();
+    console.log("✅ Firebase sync initialized successfully");
   }
 
   async function migrateLocalToFirebase() {
@@ -865,6 +911,17 @@
     populateFilters();
     updateStatsUI();
     updateDashboardUI();
+
+    // Update calendar if it exists
+    if (typeof window.initCalendar === 'function') {
+      window.initCalendar();
+    }
+
+    // Update charts if they exist
+    if (typeof window.updateCharts === 'function') {
+      window.updateCharts();
+    }
+
     // Also sync the balance input if it exists
     const balInput = id('initialBalanceInput');
     if (balInput && document.activeElement !== balInput) {

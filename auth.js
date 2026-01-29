@@ -29,11 +29,17 @@
                 if (isLoginPage) {
                     window.location.href = 'index.html';
                 }
+
+                // Fix race condition: Scripts.js might not be loaded yet
                 if (typeof window.initAppWithUser === 'function') {
                     window.initAppWithUser(user.uid);
+                } else {
+                    console.log("auth.js: window.initAppWithUser not ready, saving pending user.");
+                    window.pendingUser = user;
                 }
             } else {
                 console.log('Firebase Auth: No user session found.');
+                // Fix: Only redirect if we are NOT on login page and NOT on a public page if any
                 if (!isLoginPage) {
                     window.location.href = 'login.html';
                 }

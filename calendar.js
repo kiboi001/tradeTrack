@@ -129,8 +129,26 @@
         renderCalendar(window.currentCalendarYear, window.currentCalendarMonth);
     };
 
-    // Auto-init
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => window.initCalendar && window.initCalendar(), 100);
-    });
+    // Auto-init - handle both DOMContentLoaded and immediate execution
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.initCalendar) window.initCalendar();
+            }, 200);
+        });
+    } else {
+        // DOM already loaded, init immediately
+        setTimeout(() => {
+            if (window.initCalendar) window.initCalendar();
+        }, 200);
+    }
+
+    // Also listen for trades update
+    if (window.updateAllViews) {
+        const originalUpdate = window.updateAllViews;
+        window.updateAllViews = function () {
+            originalUpdate();
+            if (window.initCalendar) window.initCalendar();
+        };
+    }
 })();

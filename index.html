@@ -85,7 +85,7 @@
 
         <!-- Transaction Form -->
         <form id="transaction-form"
-          style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
           <select id="transactionType" required
             style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
             <option value="withdrawal">Withdrawal</option>
@@ -96,9 +96,9 @@
           <input type="date" id="transactionDate" required
             style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
           <input type="text" id="transactionNotes" placeholder="Notes (optional)"
-            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px; grid-column: span 2;">
+            style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 12px 15px; border-radius: 10px;">
           <button type="submit"
-            style="background: linear-gradient(135deg, var(--primary), #0077cc); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer;">Add
+            style="background: linear-gradient(135deg, var(--primary), #0077cc); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer; grid-column: span 2;">Add
             Transaction</button>
         </form>
 
