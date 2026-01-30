@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0d1117;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ambient glow */
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            filter: blur(150px);
+            opacity: 0.1;
+            top: -100px;
+            right: -100px;
+        }
+
+        .admin-auth-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo-box {
+            margin-bottom: 30px;
+        }
+
+        .logo-box img {
+            width: 70px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+        }
+
+        .admin-badge {
+            background: var(--primary);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        p {
+            color: #8899a6;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .auth-form input:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+            outline: none;
+        }
+
+        .admin-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #333, #000);
+            color: white;
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: var(--primary);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);
+        }
+
+        .back-link {
+            margin-top: 25px;
+            display: block;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .back-link:hover {
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="admin-auth-card">
+            <div class="logo-box">
+                <img src="2.jpg" alt="TradeTrackFX">
+            </div>
+            <div class="admin-badge">ADMINISTRATION</div>
+            <h2>Secure Gateway</h2>
+            <p>Access the proprietary monitoring suite</p>
+
+            <form class="auth-form" id="admin-login-form">
+                <input type="email" id="email" placeholder="Administrator ID (Email)" required>
+                <input type="password" id="password" placeholder="Key Phrase" required>
+                <button type="submit" class="admin-btn" id="login-btn">Authenticate</button>
+            </form>
+
+            <a href="index.html" class="back-link">Return to Public Terminal</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
+
+            try {
+                // Regular Firebase Login
+                await auth.signInWithEmailAndPassword(email, password);
+
+                // Once logged in, we check if they are authorized
+                // In a production app, we would check for a 'admin' custom claim.
+                // For this implementation, we will redirect to admin.html which will perform the final check.
+                window.location.href = 'admin.html';
+            } catch (error) {
+                alert("Authentication failed: " + error.message);
+                btn.textContent = 'Authenticate';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

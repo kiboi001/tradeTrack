@@ -245,7 +245,8 @@
     const rrEl = id('rr');
     const strategyEl = id('strategy');
     const fileEl = id('screenshot');
-    const dateEl = id('date');
+    const entryDateEl = id('entryDate');
+    const exitDateEl = id('exitDate');
     const notesEl = id('notes');
     const submitBtn = form.querySelector('button') || null;
 
@@ -294,7 +295,9 @@
         rr: rrEl ? rrEl.value : 0,
         strategy: strategyEl ? strategyEl.value : '',
         screenshot: screenData,
-        date: (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().split('T')[0],
+        entryDate: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0],
+        exitDate: (exitDateEl && exitDateEl.value) ? exitDateEl.value : new Date().toISOString().split('T')[0],
+        date: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0], // Keep for backward compatibility
         notes: notesEl ? notesEl.value : ''
       };
 
@@ -349,7 +352,8 @@
       }
 
       tr.innerHTML = `
-        <td>${t.date}</td>
+        <td>${t.entryDate || t.date}</td>
+        <td>${t.exitDate || t.date}</td>
         <td>${t.pair}</td>
         <td style="color: ${t.direction === 'buy' ? '#00E676' : '#FF5252'};">${(t.direction || 'buy').toUpperCase()}</td>
         <td>${durationDisplay}</td>
@@ -402,7 +406,8 @@
         if (id('strategy')) id('strategy').value = trade.strategy || '';
         if (id('result')) id('result').value = trade.status || 'win';
         if (id('profitLoss')) id('profitLoss').value = trade.profit;
-        if (id('date')) id('date').value = trade.date || '';
+        if (id('entryDate')) id('entryDate').value = trade.entryDate || trade.date || '';
+        if (id('exitDate')) id('exitDate').value = trade.exitDate || trade.date || '';
         if (id('notes')) id('notes').value = trade.notes || '';
         // Note: Cannot set file input for security
 
@@ -529,6 +534,18 @@
 
     // Trigger Chart Updates if function exists
     if (window.updateCharts) window.updateCharts(trades);
+
+    // NEW: Update transaction summary elements if they exist
+    const transactions = readTransactions();
+    const deposits = transactions.filter(t => t.type === 'deposit').reduce((s, t) => s + Number(t.amount || 0), 0);
+    const withdrawals = transactions.filter(t => t.type === 'withdrawal').reduce((s, t) => s + Number(t.amount || 0), 0);
+
+    const currentBalance = initialBal + s.totalProfit + deposits - withdrawals;
+
+    setText(['initial-balance-display', 'initialBalanceDisplay'], `$${initialBal.toFixed(2)}`);
+    setText(['total-deposits', 'totalDeposits'], `$${deposits.toFixed(2)}`);
+    setText(['total-withdrawals', 'totalWithdrawals'], `$${withdrawals.toFixed(2)}`);
+    setText(['account-balance', 'accountBalance'], `$${currentBalance.toFixed(2)}`);
   }
 
   // ---------- Dashboard update ----------
@@ -697,34 +714,62 @@
 
   function renderTransactionLog() {
     const logEl = id('transaction-log');
-    if (!logEl) return;
+    const tableBody = id('transaction-log-body');
+    const transactions = readTransactions().slice().sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    const transactions = readTransactions().slice().reverse(); // Most recent first
+    if (logEl) {
+      if (transactions.length === 0) {
+        logEl.innerHTML = '<p style="color: #888; text-align: center;">No transactions yet</p>';
+      } else {
+        logEl.innerHTML = transactions.map(t => {
+          const isDeposit = t.type === 'deposit';
+          const color = isDeposit ? '#00E676' : '#FF5252';
+          const sign = isDeposit ? '+' : '-';
+          const label = isDeposit ? 'DEPOSIT' : 'WITHDRAWAL';
 
-    if (transactions.length === 0) {
-      logEl.innerHTML = '<p style="color: #888; text-align: center;">No transactions yet</p>';
-      return;
+          return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; border-left: 3px solid ${color};">
+              <div>
+                <strong style="color: ${color}; font-size: 0.85rem;">${label}</strong>
+                <p style="color: #8899a6; font-size: 0.8rem; margin: 4px 0 0 0;">${t.date}${t.notes ? ' • ' + t.notes : ''}</p>
+              </div>
+              <div style="text-align: right;">
+                <strong style="color: ${color}; font-size: 1.2rem;">${sign}$${Number(t.amount).toFixed(2)}</strong>
+                <button onclick="window.deleteTransaction('${t.id}')" style="margin-left: 10px; background: transparent; border: 1px solid #FF5252; color: #FF5252; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.7rem;">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
-    logEl.innerHTML = transactions.map(t => {
-      const isDeposit = t.type === 'deposit';
-      const color = isDeposit ? '#00E676' : '#FF5252';
-      const sign = isDeposit ? '+' : '-';
-      const label = isDeposit ? 'DEPOSIT' : 'WITHDRAWAL';
+    if (tableBody) {
+      if (transactions.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888; padding: 40px;">No transactions found</td></tr>';
+      } else {
+        tableBody.innerHTML = transactions.map(t => {
+          const isDeposit = t.type === 'deposit';
+          const badgeClass = isDeposit ? 'type-deposit' : 'type-withdrawal';
+          const sign = isDeposit ? '+' : '-';
+          const color = isDeposit ? '#00E676' : '#FF5252';
 
-      return `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; border-left: 3px solid ${color};">
-          <div>
-            <strong style="color: ${color}; font-size: 0.85rem;">${label}</strong>
-            <p style="color: #8899a6; font-size: 0.8rem; margin: 4px 0 0 0;">${t.date}${t.notes ? ' • ' + t.notes : ''}</p>
-          </div>
-          <div style="text-align: right;">
-            <strong style="color: ${color}; font-size: 1.2rem;">${sign}$${Number(t.amount).toFixed(2)}</strong>
-            <button onclick="window.deleteTransaction('${t.id}')" style="margin-left: 10px; background: transparent; border: 1px solid #FF5252; color: #FF5252; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.7rem;">Delete</button>
-          </div>
-        </div>
-      `;
-    }).join('');
+          return `
+            <tr>
+              <td>${t.date}</td>
+              <td><span class="type-badge ${badgeClass}">${t.type.toUpperCase()}</span></td>
+              <td style="color: ${color}; font-weight: 600;">${sign}$${Number(t.amount).toFixed(2)}</td>
+              <td style="color: #8899a6; font-size: 0.9rem;">${t.notes || '-'}</td>
+              <td>
+                <button onclick="window.deleteTransaction('${t.id}')" 
+                  style="background: rgba(255,82,82,0.1); color: #FF5252; border: 1px solid rgba(255,82,82,0.2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
   }
 
   // ---------- CSV Export ----------

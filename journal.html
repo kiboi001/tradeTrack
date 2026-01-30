@@ -20,6 +20,7 @@
     <ul class="nav-links">
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="stats.html">Stats</a></li>
+      <li><a href="transactions.html">Wallet</a></li>
       <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
       <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
     </ul>
@@ -28,26 +29,41 @@
   <!-- Journal Section -->
   <section class="journal-container">
     <h1>Trade Journal</h1>
+    <p style="color: #888;">Log on your trades</p>
 
     <form id="trade-form">
+      <p>Currency Pair</p>
       <input type="text" id="pair" placeholder="Currency Pair (e.g., XAUUSD)" required>
+      <p>Lot Size</p>
       <input type="text" id="lot" placeholder="Lot Size" required>
+      <p>Direction</p>
       <select id="direction" required>
         <option value="buy">📈 Buy</option>
         <option value="sell">📉 Sell</option>
       </select>
+      <p>Entry Date</p>
+      <input type="date" id="entryDate" required>
+      <p>Exit Date</p>
+      <input type="date" id="exitDate" required>
+      <p>Entry Time (Optional)</p>
       <input type="time" id="entryTime" placeholder="Entry Time">
+      <p>Exit Time (Optional)</p>
       <input type="time" id="exitTime" placeholder="Exit Time">
+      <p>RR Ratio</p>
       <input type="number" id="rr" placeholder="RR Ratio (e.g. 2 for 1:2)" step="0.1" required>
+      <p>Strategy/Tag (Optional)</p>
       <input type="text" id="strategy" placeholder="Strategy/Tag (e.g. Breakout)">
+      <p>Screenshot (Optional)</p>
       <input type="file" id="screenshot" accept="image/*"
         style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; color: #8899a6;">
+      <p>Result</p>
       <select id="result">
         <option value="win">Win</option>
         <option value="loss">Loss</option>
       </select>
+      <p>Profit / Loss ($)</p>
       <input type="text" id="profitLoss" placeholder="Profit / Loss ($)" required>
-      <input type="date" id="date" required>
+      <p>Notes (Optional)</p>
       <textarea id="notes" placeholder="Notes (optional)"></textarea>
       <button type="submit">Add Trade</button>
       <button type="button" onclick="window.exportToCSV()"
@@ -58,7 +74,8 @@
       <table id="journal-table">
         <thead>
           <tr>
-            <th>Date</th>
+            <th>Entry Date</th>
+            <th>Exit Date</th>
             <th>Pair</th>
             <th>Direction</th>
             <th>Duration</th>

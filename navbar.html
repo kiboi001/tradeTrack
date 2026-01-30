@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 </head>
+
 <body>
-    <!-- Navbar -->
-<nav class="bg-transparent px-4 py-3 flex items-center justify-between relative">
-  <!-- Logo -->
-  <h1 class="text-2xl font-bold text-white">
-    TradeTrack<span class="text-blue-500">FX</span>
-  </h1>
+  <!-- Navbar -->
+  <nav class="bg-transparent px-4 py-3 flex items-center justify-between relative">
+    <!-- Logo -->
+    <h1 class="text-2xl font-bold text-white">
+      TradeTrack<span class="text-blue-500">FX</span>
+    </h1>
 
-  <!-- Hamburger (mobile) -->
-  <button id="menu-btn" class="md:hidden text-white text-3xl focus:outline-none">
-    ☰
-  </button>
+    <!-- Hamburger (mobile) -->
+    <button id="menu-btn" class="md:hidden text-white text-3xl focus:outline-none">
+      ☰
+    </button>
 
-  <!-- Nav links -->
-  <ul
-    id="menu"
-    class="hidden md:flex gap-6 text-white font-medium absolute md:static top-16 left-0 w-full bg-black/90 md:bg-transparent md:w-auto md:flex-row flex-col items-center p-5 rounded-lg z-50"
-  >
-    <li><a href="/dashboard.html" class="hover:text-blue-400">Dashboard</a></li>
-    <li><a href="/journal.html" class="hover:text-blue-400">Journal</a></li>
-    <li><a href="/stats.html" class="hover:text-blue-400">Statistics</a></li>
-  </ul>
-</nav>
-<script>
-  const menuBtn = document.getElementById("menu-btn");
-  const menu = document.getElementById("menu");
+    <!-- Nav links -->
+    <ul id="menu"
+      class="hidden md:flex gap-6 text-white font-medium absolute md:static top-16 left-0 w-full bg-black/90 md:bg-transparent md:w-auto md:flex-row flex-col items-center p-5 rounded-lg z-50">
+      <li><a href="index.html" class="hover:text-blue-400">Dashboard</a></li>
+      <li><a href="journal.html" class="hover:text-blue-400">Journal</a></li>
+      <li><a href="stats.html" class="hover:text-blue-400">Statistics</a></li>
+      <li><a href="transactions.html" class="hover:text-blue-400">Wallet</a></li>
+    </ul>
+  </nav>
+  <script>
+    const menuBtn = document.getElementById("menu-btn");
+    const menu = document.getElementById("menu");
 
-  menuBtn.addEventListener("click", () => {
-    menu.classList.toggle("hidden");
-  });
-</script>
-<script src="https://cdn.tailwindcss.com"></script>   
+    menuBtn.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
+    });
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </body>
+
 </html>
