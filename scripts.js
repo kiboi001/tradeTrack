@@ -262,8 +262,8 @@
       let screenData = null;
       if (fileEl && fileEl.files && fileEl.files[0]) {
         const file = fileEl.files[0];
-        if (file.size > 300 * 1024) { // 300KB limit
-          return alert('Image file is too large! Please use an image under 300KB.');
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          return alert('Image file is too large! Please use an image under 5MB.');
         }
         try {
           screenData = await new Promise((resolve, reject) => {
@@ -534,6 +534,7 @@
 
     // Trigger Chart Updates if function exists
     if (window.updateCharts) window.updateCharts(trades);
+    if (window.renderBestTrades) window.renderBestTrades(trades);
 
     // NEW: Update transaction summary elements if they exist
     const transactions = readTransactions();

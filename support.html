@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Console | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .support-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .ticket-form {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .ticket-form h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        select,
+        input,
+        textarea {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .ticket-history {
+            margin-top: 50px;
+        }
+
+        .ticket-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-open {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .status-closed {
+            background: rgba(255, 255, 255, 0.05);
+            color: #888;
+        }
+
+        .status-replied {
+            background: rgba(0, 255, 163, 0.1);
+            color: #00ffa3;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar (Will be injected or duplicated for consistency) -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="2.jpg" alt="logo" class="logo-image" style="height: 35px; border-radius: 8px;">
+            <span class="logo-text" style="color:#fff; font-weight:700; margin-left:10px;">TradeTrackFX</span>
+        </div>
+        <ul class="nav-links" style="display:flex; gap:20px; list-style:none;">
+            <li><a href="index.html" style="color:#888; text-decoration:none;">Dashboard</a></li>
+            <li><a href="journal.html" style="color:#888; text-decoration:none;">Journal</a></li>
+            <li><a href="support.html" style="color:var(--primary); text-decoration:none; font-weight:700;">Support</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="support-container">
+        <section class="ticket-form">
+            <h2>Support Ticket</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">How can we help you today? Our average response
+                time is under 12 hours.</p>
+
+            <form id="support-form">
+                <div class="input-group">
+                    <label>Issue Category</label>
+                    <select id="category" required>
+                        <option value="technical">Technical Issue</option>
+                        <option value="billing">Billing/Subscription</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Subject</label>
+                    <input type="text" id="subject" placeholder="Brief summary of the issue" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Description</label>
+                    <textarea id="description" rows="5" placeholder="Please provide as much detail as possible..."
+                        required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">Transmit Ticket</button>
+            </form>
+        </section>
+
+        <section class="ticket-history">
+            <h3 style="margin-bottom: 20px;">Your Recent Tickets</h3>
+            <div id="ticket-list">
+                <p style="color: #666; text-align: center; padding: 20px;">Loading your ticket history...</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="support.js"></script>
+</body>
+
+</html>

@@ -6,27 +6,28 @@
 
     // 0. Check Protocol
     if (window.location.protocol === 'file:') {
-        console.warn("Firebase Auth: You are running from a local file (file://). If login fails, try using a local server (like Live Server in VS Code).");
+        console.warn("Firebase Auth: You are running from a local file (file://).");
     }
 
-    // 1. Check if Firebase objects exist
     if (typeof auth === 'undefined' || !auth) {
-        const msg = "CRITICAL ERROR: Firebase 'auth' missing. Check your script tags in the HTML file.";
-        console.error(msg);
-        alert(msg);
+        console.error("CRITICAL ERROR: Firebase 'auth' missing.");
         return;
     }
 
     try {
         // 2. Redirect logic
         auth.onAuthStateChanged((user) => {
-            const path = window.location.pathname.toLowerCase();
-            // Handle local file paths which might have \ instead of /
-            const isLoginPage = path.includes('login.html') || path.endsWith('/') || path === '' || path.endsWith('\\');
+            const rawPath = window.location.pathname.toLowerCase();
+
+            // Precise matching for login pages
+            const isStandardLogin = rawPath.endsWith('login.html') || rawPath.endsWith('/') || rawPath === '';
+            const isAdminPage = rawPath.includes('admin'); // Protects admin.html and admin-login.html
 
             if (user) {
                 console.log('Firebase Auth: User is logged in as', user.email);
-                if (isLoginPage) {
+
+                // If on standard login page, send to dashboard
+                if (isStandardLogin && !isAdminPage) {
                     window.location.href = 'index.html';
                 }
 
@@ -34,13 +35,12 @@
                 if (typeof window.initAppWithUser === 'function') {
                     window.initAppWithUser(user.uid);
                 } else {
-                    console.log("auth.js: window.initAppWithUser not ready, saving pending user.");
                     window.pendingUser = user;
                 }
             } else {
                 console.log('Firebase Auth: No user session found.');
-                // Fix: Only redirect if we are NOT on login page and NOT on a public page if any
-                if (!isLoginPage) {
+                // Protect non-login pages
+                if (!isStandardLogin && !isAdminPage) {
                     window.location.href = 'login.html';
                 }
             }
@@ -90,7 +90,12 @@
         window.authLogout = async function () {
             try {
                 await auth.signOut();
-                window.location.href = 'login.html';
+                // If we are logged out while on an admin page, go to admin login
+                if (window.location.pathname.includes('admin')) {
+                    window.location.href = 'admin-login.html';
+                } else {
+                    window.location.href = 'login.html';
+                }
             } catch (error) {
                 console.error('Logout error', error);
             }
@@ -112,6 +117,5 @@
 
     } catch (e) {
         console.error("auth.js: Fatal startup error", e);
-        alert("auth.js failed to start: " + e.message);
     }
 })();

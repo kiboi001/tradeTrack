@@ -12,6 +12,13 @@
             grid-template-columns: 280px 1fr;
             min-height: 100vh;
             background: #0d1117;
+            position: relative;
+        }
+
+        @media (max-width: 900px) {
+            .admin-layout {
+                grid-template-columns: 1fr;
+            }
         }
 
         .admin-sidebar {
@@ -20,6 +27,24 @@
             padding: 30px;
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        @media (max-width: 900px) {
+            .admin-sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                background: #0d1117;
+                border-right: 1px solid var(--primary);
+            }
+
+            .admin-sidebar.active {
+                transform: translateX(280px);
+            }
         }
 
         .admin-content {
@@ -82,6 +107,7 @@
             border-radius: 20px;
             border: 1px solid var(--border);
             overflow: hidden;
+            margin-bottom: 50px;
         }
 
         .admin-table {
@@ -117,6 +143,61 @@
             color: #00E676;
         }
 
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.delete:hover {
+            border-color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 2000;
+            font-weight: 800;
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.5);
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .admin-content {
+                padding: 20px;
+            }
+
+            .admin-table th:nth-child(2),
+            .admin-table td:nth-child(2) {
+                display: none;
+            }
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -126,60 +207,93 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
         }
 
         .modal-content {
             background: #161b22;
             margin: 5% auto;
-            padding: 30px;
+            padding: 40px;
             border-radius: 20px;
-            width: 80%;
+            width: 90%;
             max-width: 900px;
             border: 1px solid var(--border);
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
+            position: relative;
         }
 
         .close-btn {
-            float: right;
+            position: absolute;
+            right: 20px;
+            top: 20px;
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #888;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        /* User Detail Table */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
         }
     </style>
 </head>
 
 <body>
     <div class="admin-layout">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="sidebar">
             <div class="admin-logo">
                 TradeTrack<span>FX</span>
                 <div class="badge">OWNER</div>
             </div>
             <nav style="flex: 1;">
                 <ul class="nav">
-                    <li><a href="index.html" style="color: #888; text-decoration: none;">← Exit Admin</a></li>
-                    <li style="margin-top: 20px;"><a href="#"
-                            style="background: rgba(0, 230, 118, 0.1); color: var(--primary); padding: 12px; border-radius: 10px; display: block; text-decoration: none; font-weight: 600;">👥
-                            User Insights</a></li>
-                    <li style="margin-top: 10px;"><a href="#"
-                            style="color: #555; padding: 12px; display: block; text-decoration: none; pointer-events: none;">📈
-                            System Health</a></li>
+                    <li><a href="index.html"
+                            style="color: #888; text-decoration: none; padding: 10px; display: block;">← Exit Admin</a>
+                    </li>
+                    <li style="margin-top: 20px;">
+                        <a href="#" class="active"
+                            style="background: rgba(0, 230, 118, 0.1); color: var(--primary); padding: 12px; border-radius: 10px; display: block; text-decoration: none; font-weight: 600;">
+                            👥 User Insights
+                        </a>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <a href="support.html"
+                            style="color: #aaa; padding: 12px; display: block; text-decoration: none;">
+                            🎫 Support Tickets
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <button onclick="window.authLogout()" class="reset-btn"
-                style="background: rgba(255,255,255,0.05); color: #888;">Logout Session</button>
+                style="background: rgba(255,255,255,0.05); color: #888; margin-bottom: 10px;">Logout Session</button>
         </aside>
 
         <main class="admin-content">
-            <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <header
+                style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <h1 style="font-size: 2rem;">Operations Monitor</h1>
+                    <h1 style="font-size: 2.2rem; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));">Operations
+                        Monitor</h1>
                     <p style="color: var(--text-muted);">Platform-wide activity and metrics</p>
                 </div>
-                <div style="text-align: right; color: #00E676; font-size: 0.8rem; font-weight: 600;">
+                <div
+                    style="text-align: right; color: #00E676; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;">
                     LIVE FEED ACTIVE ●
                 </div>
             </header>
@@ -203,15 +317,18 @@
                 </div>
             </div>
 
-            <h3 style="margin-bottom: 20px;">Registered User Directory</h3>
+            <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                Registered User Directory <span id="user-count-badge"
+                    style="background: var(--primary); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;">0</span>
+            </h3>
             <div class="user-table-container">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>User Identity</th>
-                            <th>Permission</th>
+                            <th>User ID / Email</th>
+                            <th>Tier</th>
                             <th>Status</th>
-                            <th>Management</th>
+                            <th>Management Actions</th>
                         </tr>
                     </thead>
                     <tbody id="user-list">
@@ -229,12 +346,17 @@
     <div id="user-details-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="window.closeModal()">&times;</span>
-            <h2 style="margin-bottom: 20px;">User Activity Audit</h2>
+            <div id="modal-header">
+                <h2 style="margin-bottom: 20px;">User Activity Audit</h2>
+            </div>
             <div id="user-trades-list">
-                <!-- User trade history will be loaded here -->
+                <!-- Data loaded via JS -->
             </div>
         </div>
     </div>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button class="mobile-toggle" id="mobileMenuBtn">☰ MENU</button>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>

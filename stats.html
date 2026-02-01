@@ -20,6 +20,7 @@
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="journal.html">Journal</a></li>
       <li><a href="transactions.html">Wallet</a></li>
+      <li><a href="support.html">Support</a></li>
       <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
       <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
     </ul>
@@ -59,8 +60,8 @@
         <p id="best-trade">$0</p>
       </div>
       <div class="stat-card">
-        <h3>Best Trade</h3>
-        <p id="best-trade">$0</p>
+        <h3>Worst Trade</h3>
+        <p id="worst-trade">$0</p>
       </div>
       <div class="stat-card">
         <h3>Max Drawdown</h3>
@@ -109,12 +110,36 @@
       <button class="tab-btn active" data-chart="profit">Profit/Loss</button>
       <button class="tab-btn" data-chart="equity">Equity Growth</button>
       <button class="tab-btn" data-chart="winrate">Win Rate</button>
+      <button class="tab-btn" data-chart="best-trades">Best Trades</button>
     </div>
 
     <div class="chart-section">
       <canvas id="profitChart"></canvas>
       <canvas id="equityChart"></canvas>
       <canvas id="winRateChart"></canvas>
+
+      <!-- Best Trades List (Hidden by default) -->
+      <div id="bestTradesList" style="display: none; padding: 20px;">
+        <h3 style="margin-bottom: 15px; color: #fff;">🏆 Top Performing Trades</h3>
+        <div class="table-wrapper">
+          <table id="best-trades-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Pair</th>
+                <th>Result</th>
+                <th>Profit ($)</th>
+                <th>RR</th>
+              </tr>
+            </thead>
+            <tbody id="best-trades-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: #888;">No trades found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </section>

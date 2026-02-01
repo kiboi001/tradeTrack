@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Plan | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .plans-container {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .plan-card {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .plan-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .plan-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: var(--primary);
+            color: #000;
+            padding: 5px 40px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            transform: rotate(45deg);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 20px 0;
+            color: #fff;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+            text-align: left;
+            flex: 1;
+        }
+
+        .plan-features li {
+            padding: 12px 0;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .plan-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .plan-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+        }
+
+        .plan-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+
+        .plan-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+
+        .current-plan-badge {
+            background: rgba(0, 230, 118, 0.1);
+            color: #00E676;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="plans-container">
+        <h1 style="font-size: 3rem; font-weight: 900; margin-bottom: 10px;">Elevate Your Strategy</h1>
+        <p style="color: var(--text-muted); font-size: 1.2rem;">Choose the professional toolkit built for your growth.
+        </p>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="plan-card">
+                <div class="plan-name">Free Tier</div>
+                <div class="plan-price">$0<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Unlimited Trade Journaling</li>
+                    <li>Basic Statistics</li>
+                    <li>Community Support</li>
+                    <li>Single Device Sync</li>
+                </ul>
+                <button class="plan-btn secondary" id="btn-free">Stay Free</button>
+            </div>
+
+            <!-- Monthly Plan -->
+            <div class="plan-card featured">
+                <div class="plan-name">Pro Monthly</div>
+                <div class="plan-price">$10<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Advanced Analytics Suite</li>
+                    <li>Screenshot Cloud Storage (5MB)</li>
+                    <li>Priority Support Tickets</li>
+                    <li>Multi-device Real-time Sync</li>
+                    <li>Export to CSV/Excel</li>
+                </ul>
+                <button class="plan-btn primary" id="btn-monthly">Get Started</button>
+            </div>
+
+            <!-- Annual Plan -->
+            <div class="plan-card">
+                <div class="plan-name">Pro Annual</div>
+                <div class="plan-price">$100<span>/year</span></div>
+                <p style="color: var(--primary); font-size: 0.8rem; font-weight: 700;">SAVE $20 PER YEAR</p>
+                <ul class="plan-features">
+                    <li>All Pro Monthly Features</li>
+                    <li>Early Access to Beta Tools</li>
+                    <li>personalized Performance Audits</li>
+                    <li>VIP Support Channel</li>
+                </ul>
+                <button class="plan-btn secondary" id="btn-annual">Save with Yearly</button>
+            </div>
+        </div>
+
+        <p style="margin-top: 40px; color: #555; font-size: 0.9rem;">
+            Payments are simulated for this demonstration. Clicking a plan will update your account status instantly.
+        </p>
+        <div style="margin-top: 20px;">
+            <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">← Back to
+                Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Track buttons
+                const plans = {
+                    'btn-free': 'Free',
+                    'btn-monthly': 'Pro Monthly',
+                    'btn-annual': 'Pro Annual'
+                };
+
+                Object.keys(plans).forEach(id => {
+                    document.getElementById(id).addEventListener('click', async () => {
+                        try {
+                            await db.collection('users').doc(user.uid).set({
+                                subscription: plans[id]
+                            }, { merge: true });
+                            alert(`Plan upgraded to ${plans[id]} successfully!`);
+                            window.location.href = 'index.html';
+                        } catch (e) {
+                            alert('Update failed: ' + e.message);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

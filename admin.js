@@ -1,4 +1,4 @@
-// admin.js
+// admin.js (Enhanced)
 (function () {
   const q = sel => document.querySelector(sel);
   const id = n => document.getElementById(n);
@@ -9,52 +9,51 @@
   async function initAdmin() {
     console.log("Admin Panel: Initializing...");
 
+    // Mobile Sidebar Toggle
+    const mobileBtn = id('mobileMenuBtn');
+    const sidebar = id('sidebar');
+    if (mobileBtn && sidebar) {
+      mobileBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+      // Close when clicking links on mobile
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => sidebar.classList.remove('active'));
+      });
+    }
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         window.location.href = 'admin-login.html';
         return;
       }
 
-      // 1. Verify Admin Status (Simple check for now, recommend Custom Claims later)
-      // Check if user is in 'admins' collection or has custom claim
-      // For this implementation, we will check if we can read the 'users' collection.
       try {
         await fetchAllUsers();
         await fetchGlobalStats();
       } catch (err) {
         console.error("Admin access denied or Error:", err);
-        const listEl = id('user-list');
-        const projectId = firebase.app().options.projectId;
-        if (listEl) {
-          listEl.innerHTML = `
-            <tr>
-              <td colspan="4" style="text-align: center; color: #FF5252; padding: 40px;">
-                <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">Auth Error: Permission Denied</div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin: 20px auto; max-width: 500px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid #333;">
-                  <div>
-                    <div style="color: #888; font-size: 0.75rem;">CONNECTED PROJECT ID</div>
-                    <div style="font-family: monospace; color: #00E676;">${projectId}</div>
-                  </div>
-                  <div>
-                    <div style="color: #888; font-size: 0.75rem;">YOUR USER UID</div>
-                    <div style="font-family: monospace; color: #fff;">${user.uid}</div>
-                  </div>
-                </div>
-
-                <div style="color: #888; font-size: 0.8rem; margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;">
-                   <b>Final Verification Checklist:</b><br><br>
-                   1. Is your Firebase Console showing Project ID: <b style="color:#00E676">${projectId}</b>?<br>
-                   2. Is there a collection named exactly <b style="color:#fff">admins</b>?<br>
-                   3. Does that collection have a document with ID <b style="color:#fff">${user.uid}</b>?<br>
-                   4. Did you paste the rules and click <b style="color:#fff">PUBLISH</b>?
-                </div>
-              </td>
-            </tr>
-          `;
-        }
+        renderAccessError(user, err);
       }
     });
+  }
+
+  function renderAccessError(user, err) {
+    const listEl = id('user-list');
+    const projectId = firebase.app().options.projectId;
+    if (listEl) {
+      listEl.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align: center; color: #FF5252; padding: 40px;">
+            <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">Access Forbidden</div>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">You are not in the authorized administrators list.</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; display: inline-block; text-align: left;">
+                <div style="font-size: 0.7rem; color: #666;">REQUIRED CREDENTIALS</div>
+                <div style="font-family: monospace; color: #fff;">UID: ${user.uid}</div>
+            </div>
+          </td>
+        </tr>`;
+    }
   }
 
   async function fetchAllUsers() {
@@ -65,11 +64,12 @@
       const snap = await db.collection('users').get();
       ALL_USERS = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      console.log(`Loaded ${ALL_USERS.length} users.`);
+      const badge = id('user-count-badge');
+      if (badge) badge.textContent = ALL_USERS.length;
+
       renderUserTable();
     } catch (e) {
       console.error("Error fetching users:", e);
-      listEl.innerHTML = `<tr><td colspan="5" style="color: #FF5252; text-align: center;">Permission Denied (Firestore)</td></tr>`;
       throw e;
     }
   }
@@ -79,7 +79,7 @@
     if (!listEl) return;
 
     if (ALL_USERS.length === 0) {
-      listEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888;">No users found</td></tr>`;
+      listEl.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">No users found in database</td></tr>`;
       return;
     }
 
@@ -87,22 +87,56 @@
       return `
         <tr>
           <td>
-            <div style="font-weight: 600;">${user.id.substring(0, 8)}...</div>
-            <div style="font-size: 0.8rem; color: #888;">${user.email || 'No email provided'}</div>
+            <div style="font-weight: 600; color: #fff;">${user.id.substring(0, 8)}...</div>
+            <div style="font-size: 0.75rem; color: #888;">${user.email || 'No email saved'}</div>
           </td>
-          <td>User</td>
-          <td><span class="status-badge">Active</span></td>
-          <td>
-             <button onclick="window.viewUserTrades('${user.id}')" style="background: var(--primary); color: #000; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">View Details</button>
+          <td><span style="color: #00d4ff;">${user.subscription || 'Free'}</span></td>
+          <td><span class="status-badge" style="${user.disabled ? 'background:rgba(255,77,77,0.1);color:#ff4d4d;' : ''}">${user.disabled ? 'Disabled' : 'Active'}</span></td>
+          <td style="white-space: nowrap;">
+             <button class="action-btn" onclick="window.viewUserTrades('${user.id}')" title="Audit Trades">🔎 View</button>
+             <button class="action-btn" onclick="window.emailUser('${user.email}')" title="Send Email">✉️ Email</button>
+             <button class="action-btn" onclick="window.editUser('${user.id}')" title="Edit Settings">⚙️ Edit</button>
+             <button class="action-btn delete" onclick="window.deleteUserRecord('${user.id}')" title="Delete Account">🗑️</button>
           </td>
         </tr>
       `;
     }).join('');
   }
 
+  // --- Management Functions ---
+
+  window.emailUser = function (email) {
+    if (!email || email === 'No email saved') return alert('No valid email for this user.');
+    window.location.href = `mailto:${email}?subject=TradeTrackFX Support Notification`;
+  };
+
+  window.editUser = function (userId) {
+    const user = ALL_USERS.find(u => u.id === userId);
+    const newTier = prompt(`Update subscription tier for ${user.email}:`, user.subscription || 'Free');
+    if (newTier !== null) {
+      db.collection('users').doc(userId).set({ subscription: newTier }, { merge: true })
+        .then(() => {
+          alert('User updated successfully');
+          fetchAllUsers();
+        });
+    }
+  };
+
+  window.deleteUserRecord = async function (userId) {
+    if (!confirm(`CRITICAL: Are you sure you want to delete this user's record from the database? This will clear their Firestore document but NOT their Auth account.`)) return;
+
+    try {
+      await db.collection('users').doc(userId).delete();
+      alert('User document deleted.');
+      fetchAllUsers();
+    } catch (e) {
+      alert('Delete failed: ' + e.message);
+    }
+  };
+
+  // --- Statistics ---
+
   async function fetchGlobalStats() {
-    // This is expensive in Firestore for large datasets (collectionGroup)
-    // For small apps, it works fine.
     try {
       const tradesSnap = await db.collectionGroup('trades').get();
       const totalTrades = tradesSnap.size;
@@ -129,6 +163,40 @@
     }
   }
 
+  // --- Audit View ---
+
+  // --- Statistics ---
+
+  async function fetchGlobalStats() {
+    try {
+      // Platform Metrics
+      const tradesSnap = await db.collectionGroup('trades').get();
+      const totalTrades = tradesSnap.size;
+
+      let totalProfit = 0;
+      let totalWins = 0;
+
+      tradesSnap.forEach(doc => {
+        const t = doc.data();
+        totalProfit += parseFloat(t.profit || 0);
+        if (parseFloat(t.profit || 0) > 0) totalWins++;
+      });
+
+      const winRate = totalTrades ? (totalWins / totalTrades * 100).toFixed(1) : 0;
+
+      id('total-platform-trades').textContent = totalTrades;
+      id('total-platform-users').textContent = ALL_USERS.length;
+      id('platform-win-rate').textContent = winRate + '%';
+      id('platform-pnl').textContent = `$${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      id('platform-pnl').style.color = totalProfit >= 0 ? '#00E676' : '#FF5252';
+
+    } catch (e) {
+      console.error("Global stats error:", e);
+    }
+  }
+
+  // --- Audit View ---
+
   window.viewUserTrades = async function (userId) {
     const modal = id('user-details-modal');
     const modalContent = id('user-trades-list');
@@ -147,13 +215,13 @@
       }
 
       modalContent.innerHTML = `
-         <table class="user-table" style="font-size: 0.9rem;">
+         <table class="user-table" style="font-size: 0.9rem; color: #fff;">
            <thead>
-             <tr>
-               <th>Date</th>
-               <th>Pair</th>
-               <th>Result</th>
-               <th>P/L</th>
+             <tr style="color: #666; font-size: 0.8rem;">
+               <th>DATE</th>
+               <th>PAIR</th>
+               <th>RESULT</th>
+               <th>P/L ($)</th>
              </tr>
            </thead>
            <tbody>
@@ -161,8 +229,8 @@
                <tr>
                  <td>${t.date}</td>
                  <td>${t.pair}</td>
-                 <td>${(t.status || 'win').toUpperCase()}</td>
-                 <td style="color: ${t.profit >= 0 ? '#00E676' : '#FF5252'}">$${Number(t.profit).toFixed(2)}</td>
+                 <td style="color: ${t.profit > 0 ? '#00ffa3' : '#ff4d4d'}">${(t.status || 'win').toUpperCase()}</td>
+                 <td style="font-weight: 700; color: ${t.profit >= 0 ? '#00E676' : '#FF5252'}">$${Number(t.profit).toFixed(2)}</td>
                </tr>
              `).join('')}
            </tbody>
@@ -173,8 +241,25 @@
     }
   }
 
+  // --- Ticket Management ---
+
+  async function fetchTickets() {
+    const ticketList = id('ticket-list'); // If you add this later
+    // For now, let's just alert the admin if there are new tickets
+    const snap = await db.collection('tickets').where('status', '==', 'open').get();
+    console.log(`Found ${snap.size} open support tickets.`);
+  }
+
   window.closeModal = function () {
     id('user-details-modal').style.display = 'none';
+  }
+
+  // Close modals when clicking outside
+  window.onclick = function (event) {
+    const modal = id('user-details-modal');
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
   }
 
   document.addEventListener('DOMContentLoaded', initAdmin);
