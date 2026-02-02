@@ -32,6 +32,40 @@
     window.pendingUser = null; // clear
   }
 
+  // ---------- JS Image Compressor ----------
+  async function compressImage(file, maxWidth = 1200, quality = 0.6) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = event => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Resize if wider than maxWidth
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Get compressed base64
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = error => reject(error);
+      };
+      reader.onerror = error => reject(error);
+    });
+  }
+
   // load trades safely
   function readTrades() {
     return TRADES;
@@ -80,16 +114,10 @@
     if (tradeId) t.id = tradeId;
     if (isFirebaseReady && CURRENT_USER_ID) {
       console.log(`Saving trade ${t.id} to Firebase for user ${CURRENT_USER_ID}...`);
-      // If we have a local base64 image, upload to Storage first
-      if (t.screenshot && t.screenshot.startsWith('data:image')) {
-        try {
-          const storageRef = storage.ref(`trades/${CURRENT_USER_ID}/${t.id}.png`);
-          const snapshot = await storageRef.putString(t.screenshot, 'data_url');
-          t.screenshot = await snapshot.ref.getDownloadURL();
-        } catch (err) {
-          console.error('Storage upload failed', err);
-        }
-      }
+
+      // FIREBASE STORAGE BYPASS: We store compressed base64 directly in Firestore
+      // to avoid the 'Blaze Plan' requirement for Cloud Storage.
+
       try {
         await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(t.id).set(t);
         console.log("Trade saved successfully to Firestore.");
@@ -112,10 +140,6 @@
   async function deleteTrade(idToRemove) {
     if (isFirebaseReady && CURRENT_USER_ID) {
       await db.collection('users').doc(CURRENT_USER_ID).collection('trades').doc(idToRemove).delete();
-      // Also try to delete image from storage
-      try {
-        await storage.ref(`trades/${CURRENT_USER_ID}/${idToRemove}.png`).delete();
-      } catch (e) { }
     } else {
       const trades = JSON.parse(localStorage.getItem(TRADES_KEY) || '[]').filter(t => t.id !== idToRemove);
       localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
@@ -262,19 +286,12 @@
       let screenData = null;
       if (fileEl && fileEl.files && fileEl.files[0]) {
         const file = fileEl.files[0];
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-          return alert('Image file is too large! Please use an image under 5MB.');
-        }
         try {
-          screenData = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
+          // JS Compression logic to stay under Firestore 1MB limit
+          screenData = await compressImage(file, 1200, 0.6);
         } catch (err) {
-          console.error('File read error', err);
-          return alert('Error reading image file');
+          console.error('Compression error', err);
+          return alert('Error processing image');
         }
       } else {
         // preserve existing screenshot if editing and no new file selected
@@ -446,8 +463,8 @@
 
     // Result Filter
     if (resultEl && resultEl.value) {
-      if (resultEl.value === 'win') trades = trades.filter(t => t.profit > 0);
-      else if (resultEl.value === 'loss') trades = trades.filter(t => t.profit <= 0);
+      if (resultEl.value === 'win') trades = trades.filter(t => t.profit >= 0);
+      else if (resultEl.value === 'loss') trades = trades.filter(t => t.profit < 0);
     }
 
     // Direction Filter
@@ -487,8 +504,8 @@
   function computeSummary(tradesOverride = null) {
     const trades = tradesOverride || readTrades();
     const totalTrades = trades.length;
-    const wins = trades.filter(t => Number(t.profit) > 0).length;
     const totalProfit = trades.reduce((s, t) => s + Number(t.profit || 0), 0);
+    const wins = trades.filter(t => Number(t.profit) >= 0).length;
     const winRate = totalTrades ? (wins / totalTrades * 100) : 0;
     const best = trades.length ? Math.max(...trades.map(t => Number(t.profit || 0))) : 0;
     const worst = trades.length ? Math.min(...trades.map(t => Number(t.profit || 0))) : 0;
@@ -524,10 +541,20 @@
     setText(['totalProfit', 'total-profit', 'total-profit'], `$${s.totalProfit.toFixed(2)}`);
     setText(['winRate', 'win-rate', 'win-rate-el'], `${s.winRate.toFixed(1)}%`);
     setText(['bestTrade', 'best-trade'], `$${s.best.toFixed(2)}`);
-    // setText(['worstTrade', 'worst-trade'], `$${s.worst.toFixed(2)}`); // Optional if used
+    setText(['worstTrade', 'worst-trade'], `$${s.worst.toFixed(2)}`);
 
     // NEW: Average RR
     setText(['avgRR', 'avg-rr', 'average-rr'], `1:${s.avgRR.toFixed(2)}`);
+
+    // NEW: Advanced Metrics
+    if (typeof computeAdvancedMetrics === 'function') {
+      const adv = computeAdvancedMetrics(trades);
+      setText(['max-drawdown'], `$${adv.maxDrawdown.toFixed(2)}`);
+      setText(['profit-factor'], adv.profitFactor.toFixed(2));
+      setText(['win-streak'], adv.maxWinStreak);
+      setText(['loss-streak'], adv.maxLossStreak);
+    }
+
     // Update initial balance display if exists
     const initBalEl = id('initialBalanceDisplay');
     if (initBalEl) initBalEl.textContent = `$${initialBal.toFixed(2)}`;
@@ -1012,6 +1039,7 @@
         id('filter-end').value = '';
         id('filter-pair').value = '';
         id('filter-result').value = '';
+        if (id('filter-direction')) id('filter-direction').value = '';
         updateStatsUI();
       });
     }
