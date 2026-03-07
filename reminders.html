@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Trading discipline tools and reminders on TradeTrackFX. Set trade logging reminders, review your weekly goals, and stay accountable as a forex trader." />
+    <title>TradeTrackFX | Reminders</title>
+    <link rel="icon" href="2.jpg" type="image/jpeg" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        .reminders-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .reminders-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .reminders-header h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .reminders-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .reminder-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .reminder-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .reminder-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reminder-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.7;
+        }
+
+        .rules-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rules-list li {
+            background: rgba(0, 212, 255, 0.04);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .rules-list li .icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist-item label {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            cursor: pointer;
+            line-height: 1.5;
+        }
+
+        .checklist-item input:checked+label {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .streak-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .streak-stat {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .streak-stat .streak-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .streak-stat .streak-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .cta-link {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .cta-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="2.jpg" alt="logo" class="logo-image">
+            <span class="logo-text">TradeTrackFX</span>
+        </div>
+        <button class="menu-toggle" id="navToggle">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="journal.html">📓 Journal</a></li>
+            <li><a href="stats.html">📊 Stats</a></li>
+            <li><a href="transactions.html">Wallet</a></li>
+            <li><a href="reminders.html" class="nav-active">🔔 Reminders</a></li>
+            <li><a href="support.html">Support</a></li>
+            <li><a href="contact.html">🌐 Contact</a></li>
+            <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
+            <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="reminders-container">
+        <div class="reminders-header">
+            <h1>🔔 Discipline Tools</h1>
+            <p>Stay consistent, protect your capital, and trade like a professional.</p>
+        </div>
+
+        <!-- Daily Pre-Trade Checklist -->
+        <div class="reminder-card">
+            <h3>✅ Daily Pre-Trade Checklist</h3>
+            <p>Run through this checklist before placing any trade today. Discipline beats emotion every time.</p>
+            <div id="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="c1">
+                    <label for="c1">I have reviewed my overall account balance and risk exposure today.</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c2">
+                    <label for="c2">I have identified the major market sessions active right now (London / NY /
+                        Asian).</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c3">
+                    <label for="c3">I have a clear entry, stop loss and take profit before I place the trade.</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c4">
+                    <label for="c4">My risk per trade is within my personal limit (max 1–2% of account).</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c5">
+                    <label for="c5">I am trading a strategy I have backtested and understand.</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c6">
+                    <label for="c6">I am emotionally calm and not trading out of greed, fear, or revenge.</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="c7">
+                    <label for="c7">I will log this trade in my journal immediately after closing it.</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Rules -->
+        <div class="reminder-card">
+            <h3>📋 Core Trading Rules to Remember</h3>
+            <p>These are universal principles that separate disciplined professionals from emotional traders.</p>
+            <ul class="rules-list">
+                <li><span class="icon">🛡️</span> <span><strong>Protect capital first.</strong> Your goal is to KEEP
+                        your money, then grow it. Survival comes before profit.</span></li>
+                <li><span class="icon">📐</span> <span><strong>Never risk more than 2% per trade.</strong> A losing
+                        streak of 10 trades should not end your account.</span></li>
+                <li><span class="icon">⏳</span> <span><strong>Wait for your setup.</strong> Not trading IS a position.
+                        Missing a trade is far better than taking a bad one.</span></li>
+                <li><span class="icon">🚫</span> <span><strong>No revenge trading.</strong> After a loss, step away for
+                        at least 30 minutes before reviewing the next setup.</span></li>
+                <li><span class="icon">📓</span> <span><strong>Log every trade.</strong> You cannot improve what you
+                        cannot measure. Even losses teach you something.</span></li>
+                <li><span class="icon">🎯</span> <span><strong>Stick to your take profit.</strong> Moving TP further out
+                        of greed is how good setups turn into losers.</span></li>
+                <li><span class="icon">🧘</span> <span><strong>Trade the plan, not emotions.</strong> If you feel
+                        excited or anxious about pressing the button, pause and review.</span></li>
+            </ul>
+        </div>
+
+        <!-- Quick Stats Reminder -->
+        <div class="reminder-card">
+            <h3>📊 Review Your Numbers</h3>
+            <p>Stay aware of your current performance. Knowledge of your own stats prevents overtrading and emotional
+                decisions.</p>
+            <div class="streak-box">
+                <div class="streak-stat">
+                    <div class="streak-value" id="dash-total-trades">—</div>
+                    <div class="streak-label">Total Trades</div>
+                </div>
+                <div class="streak-stat">
+                    <div class="streak-value" id="dash-win-rate">—</div>
+                    <div class="streak-label">Win Rate</div>
+                </div>
+                <div class="streak-stat">
+                    <div class="streak-value" id="dash-profit">—</div>
+                    <div class="streak-label">Total P/L</div>
+                </div>
+                <div class="streak-stat">
+                    <div class="streak-value" id="dash-avg-rr">—</div>
+                    <div class="streak-label">Avg RR</div>
+                </div>
+            </div>
+            <br>
+            <a href="stats.html" class="cta-link">→ View Full Stats</a>
+        </div>
+
+        <!-- Weekly Goals -->
+        <div class="reminder-card">
+            <h3>🎯 Weekly Trading Goals</h3>
+            <p>Set clear, achievable weekly goals. Focus on process — not just profit. Good process leads to consistent
+                profit.</p>
+            <ul class="rules-list">
+                <li><span class="icon">📅</span> <span>Log every trade taken this week in the journal, including
+                        screenshots where possible.</span></li>
+                <li><span class="icon">🔍</span> <span>Review any losing trades — identify if the loss was due to bad
+                        process or just market randomness.</span></li>
+                <li><span class="icon">💡</span> <span>Identify one pattern that is working well this week and note it
+                        in your trade journal.</span></li>
+                <li><span class="icon">📉</span> <span>If you hit 3 consecutive losses in a day, stop trading for that
+                        day — no exceptions.</span></li>
+                <li><span class="icon">✨</span> <span>End the week with a brief summary of what you learned. Continuous
+                        improvement beats short-term wins.</span></li>
+            </ul>
+            <br>
+            <a href="journal.html" class="cta-link">→ Open Trade Journal</a>
+        </div>
+
+    </div>
+
+    <footer
+        style="text-align:center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: 2rem;">
+        <p>© 2026 TradeTrackFX. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="scripts.js" defer></script>
+
+    <script>
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        // Persist checklist state in localStorage
+        document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => {
+            const key = 'reminder_' + cb.id;
+            cb.checked = localStorage.getItem(key) === '1';
+            cb.addEventListener('change', () => {
+                localStorage.setItem(key, cb.checked ? '1' : '0');
+            });
+        });
+
+        // Reset checklist daily
+        const lastReset = localStorage.getItem('checklist_date');
+        const today = new Date().toISOString().split('T')[0];
+        if (lastReset !== today) {
+            document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                localStorage.removeItem('reminder_' + cb.id);
+            });
+            localStorage.setItem('checklist_date', today);
+        }
+
+        // Pull in live stats from scripts.js once loaded
+        window.onDashboardReady = function (count) {
+            const trades = window.getTrades ? window.getTrades() : [];
+            if (!trades.length) return;
+
+            const wins = trades.filter(t => t.profit >= 0).length;
+            const totalProfit = trades.reduce((s, t) => s + (t.profit || 0), 0);
+            const avgRR = (trades.reduce((s, t) => s + (parseFloat(t.rr) || 0), 0) / trades.length).toFixed(2);
+
+            const el = id => document.getElementById(id);
+            if (el('dash-total-trades')) el('dash-total-trades').textContent = trades.length;
+            if (el('dash-win-rate')) el('dash-win-rate').textContent = (wins / trades.length * 100).toFixed(1) + '%';
+            if (el('dash-profit')) el('dash-profit').textContent = '$' + totalProfit.toFixed(2);
+            if (el('dash-avg-rr')) el('dash-avg-rr').textContent = '1:' + avgRR;
+        };
+    </script>
+</body>
+
+</html>

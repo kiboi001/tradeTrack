@@ -1,4 +1,6 @@
 // firebase-config.js
+// Fixed for iPad / Safari compatibility (IndexedDB / ITP issues)
+
 const firebaseConfig = {
     apiKey: "AIzaSyDyTCmpcS7rsqmDrnI85lS-C14Z1Jom7jU",
     authDomain: "tradetrack-44b18.firebaseapp.com",
@@ -9,62 +11,64 @@ const firebaseConfig = {
     measurementId: "G-RJ3NTVPWYH"
 };
 
-console.log("🔥 Firebase Config: Starting initialization...");
-
-// Check if Firebase SDK is loaded
-if (typeof firebase === 'undefined') {
-    console.error("❌ CRITICAL: Firebase SDK not loaded! Check your script tags.");
-} else {
-    console.log("✅ Firebase SDK loaded successfully");
-}
-
 // Initialize Firebase using the Compat SDK
 try {
     firebase.initializeApp(firebaseConfig);
     console.log("✅ Firebase App initialized");
 } catch (error) {
-    console.error("❌ Firebase initialization error:", error);
+    if (error.code !== 'app/duplicate-app') {
+        console.error("❌ Firebase initialization error:", error);
+    }
 }
 
-// Initialize Firestore if available
+// Initialize core services
 var db = (typeof firebase.firestore === 'function') ? firebase.firestore() : null;
-if (db) {
-    console.log("✅ Firestore initialized");
-} else {
-    console.error("❌ Firestore not available");
-}
-
-// Initialize Auth if available
 var auth = (typeof firebase.auth === 'function') ? firebase.auth() : null;
-if (auth) {
-    console.log("✅ Auth initialized");
-} else {
-    console.error("❌ Auth not available");
-}
-
-// Initialize Storage if available
 var storage = (typeof firebase.storage === 'function') ? firebase.storage() : null;
-if (storage) {
-    console.log("✅ Storage initialized");
-} else {
-    console.error("❌ Storage not available");
-}
 
-// Optional: Enable offline persistence
+// ── iPad / Safari fix ──────────────────────────────────────────────────────────
+// `enablePersistence()` fails silently on Safari ITP and iPad private mode.
+// We catch ALL errors and fall back gracefully without breaking the app.
+// Previously this caused the site to hang on iOS/iPad.
 if (db) {
-    db.enablePersistence()
+    db.enablePersistence({ synchronizeTabs: true })
         .then(() => {
-            console.log("✅ Firestore persistence enabled");
+            console.log("✅ Firestore offline persistence enabled");
         })
         .catch((err) => {
-            if (err.code == 'failed-precondition') {
-                console.warn('⚠️ Persistence failed: Multiple tabs open');
-            } else if (err.code == 'unimplemented') {
-                console.warn('⚠️ Persistence not supported by browser');
+            if (err.code === 'failed-precondition') {
+                // Multiple tabs open — use in-memory cache only
+                console.warn('⚠️ Persistence disabled: multiple tabs open. Using in-memory cache.');
+            } else if (err.code === 'unimplemented') {
+                // Safari / iPad / private mode — not supported
+                console.warn('⚠️ Persistence not supported on this browser (Safari/iPad/private mode). App will use live data only.');
             } else {
-                console.error('❌ Persistence error:', err);
+                // Any other error — log but do NOT crash the app
+                console.warn('⚠️ Persistence error (non-fatal):', err.code, err.message);
             }
+            // App continues normally without offline persistence
         });
 }
 
-console.log("🔥 Firebase Config: Initialization complete");
+// Safari-specific: Firestore settings to improve iPad compatibility
+// longerPollingInterval reduces connection drops on mobile Safari
+if (db) {
+    try {
+        db.settings({
+            experimentalForceLongPolling: isSafariOrIOS(), // Long polling on iOS/Safari
+            merge: true
+        });
+    } catch (e) {
+        // Settings already applied or not supported — ignore
+    }
+}
+
+// Detect Safari or iOS device
+function isSafariOrIOS() {
+    const ua = navigator.userAgent;
+    return /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || // iPad Pro
+        /^((?!chrome|android).)*safari/i.test(ua);
+}
+
+console.log("🔥 Firebase ready | Safari/iPad mode:", isSafariOrIOS());

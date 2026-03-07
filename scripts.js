@@ -104,7 +104,10 @@
       profit: profit,
       status: status,
       date: raw.date || new Date().toISOString().split('T')[0],
-      notes: raw.notes || ''
+      notes: raw.notes || '',
+      // AI-ready fields
+      timeframe: raw.timeframe || '',
+      session: raw.session || ''
     };
   }
 
@@ -301,21 +304,26 @@
         }
       }
 
+      const timeframeEl = id('timeframe');
+      const sessionEl = id('session');
+
       const candidate = {
         pair: pairEl.value.trim(),
         profit: Number.isFinite(profitNum) ? profitNum : 0,
         status: statusEl ? statusEl.value : (profitNum < 0 ? 'loss' : 'win'),
         lot: lotEl ? lotEl.value : '',
-        direction: directionEl ? directionEl.value : 'buy', // NEW
-        entryTime: entryTimeEl ? entryTimeEl.value : '', // NEW
-        exitTime: exitTimeEl ? exitTimeEl.value : '', // NEW
+        direction: directionEl ? directionEl.value : 'buy',
+        entryTime: entryTimeEl ? entryTimeEl.value : '',
+        exitTime: exitTimeEl ? exitTimeEl.value : '',
         rr: rrEl ? rrEl.value : 0,
         strategy: strategyEl ? strategyEl.value : '',
         screenshot: screenData,
         entryDate: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0],
         exitDate: (exitDateEl && exitDateEl.value) ? exitDateEl.value : new Date().toISOString().split('T')[0],
-        date: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0], // Keep for backward compatibility
-        notes: notesEl ? notesEl.value : ''
+        date: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0],
+        notes: notesEl ? notesEl.value : '',
+        timeframe: timeframeEl ? timeframeEl.value : '',
+        session: sessionEl ? sessionEl.value : ''
       };
 
       // If update mode
@@ -371,19 +379,21 @@
       tr.innerHTML = `
         <td>${t.entryDate || t.date}</td>
         <td>${t.exitDate || t.date}</td>
-        <td>${t.pair}</td>
-        <td style="color: ${t.direction === 'buy' ? '#00E676' : '#FF5252'};">${(t.direction || 'buy').toUpperCase()}</td>
+        <td><strong>${t.pair}</strong></td>
+        <td style="color: ${t.direction === 'buy' ? '#00E676' : '#FF5252'}; font-weight:600;">${(t.direction || 'buy').toUpperCase()}</td>
         <td>${durationDisplay}</td>
-        <td>${t.lot || ''}</td>
+        <td>${t.lot || '-'}</td>
+        <td>${t.timeframe || '-'}</td>
+        <td>${t.session || '-'}</td>
         <td>${t.strategy || '-'}</td>
         <td>${rrDisplay}</td>
         <td class="pnl ${cls}">${String(t.status || '').toUpperCase()}</td>
         <td class="pnl ${cls}">$${Number(t.profit || 0).toFixed(2)}</td>
-        <td>${(t.notes || '').substring(0, 50)}${(t.notes && t.notes.length > 50) ? '...' : ''}</td>
+        <td>${(t.notes || '').substring(0, 40)}${(t.notes && t.notes.length > 40) ? '...' : ''}</td>
         <td>${screenHtml}</td>
-        <td>
+        <td style="white-space:nowrap;">
           <button class="edit-btn" data-id="${t.id}">Edit</button>
-          <button class="delete-btn" data-id="${t.id}">Delete</button>
+          <button class="delete-btn" data-id="${t.id}" style="background:rgba(255,77,77,0.15);color:#ff4d4d;border:1px solid rgba(255,77,77,0.3);">Delete</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -426,6 +436,8 @@
         if (id('entryDate')) id('entryDate').value = trade.entryDate || trade.date || '';
         if (id('exitDate')) id('exitDate').value = trade.exitDate || trade.date || '';
         if (id('notes')) id('notes').value = trade.notes || '';
+        if (id('timeframe')) id('timeframe').value = trade.timeframe || '';
+        if (id('session')) id('session').value = trade.session || '';
         // Note: Cannot set file input for security
 
         const formBtn = document.querySelector('#trade-form button[type="submit"]');
@@ -617,7 +629,6 @@
   }
 
   // main updater called after any change
-  // main updater called after any change
   window.updateAllViews = function () {
     renderJournalTable();
     renderGallery();
@@ -626,10 +637,14 @@
     populateFilters();
     updateStatsUI();
     updateDashboardUI();
-    // Also sync the balance input if it exists
+    // Sync balance input if exists
     const balInput = id('initialBalanceInput');
     if (balInput && document.activeElement !== balInput) {
       balInput.value = readInitialBalance();
+    }
+    // Notify dashboard of trade count (for onboarding state)
+    if (typeof window.onDashboardReady === 'function') {
+      window.onDashboardReady(TRADES.length);
     }
   };
 

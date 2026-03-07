@@ -4,36 +4,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Analyse your forex trading performance. View win rate, profit factor, drawdown, equity growth charts and your full trading calendar on TradeTrackFX." />
   <title>TradeTrackFX | Stats</title>
+  <link rel="icon" href="2.jpg" type="image/jpeg" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="stats.css" />
+  <link rel="stylesheet" href="calendar-styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-  <!-- ✅ NAVBAR -->
+  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="logo">TradeTrack<span>FX</span></div>
     <button class="menu-toggle" id="navToggle">☰</button>
-    <ul class="nav-links">
+    <ul class="nav-links" id="navLinks">
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="journal.html">Journal</a></li>
+      <li><a href="stats.html" class="nav-active">Stats</a></li>
       <li><a href="transactions.html">Wallet</a></li>
+      <li><a href="reminders.html">🔔 Reminders</a></li>
       <li><a href="support.html">Support</a></li>
+      <li><a href="contact.html">🌐 Contact</a></li>
+      <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
       <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
-      <li><a href="#" onclick="window.resetAllData(); return false;" style="color: #ff4444;">Reset Data</a></li>
     </ul>
   </nav>
 
-  <!-- ✅ MAIN SECTION -->
+  <!-- MAIN SECTION -->
   <section class="stats-section">
     <h1>Your Trading Statistics</h1>
     <p class="subtext">Track your performance, visualize your progress, and stay consistent.</p>
 
-
-
-    <!-- ✅ STATS OVERVIEW -->
+    <!-- STATS OVERVIEW -->
     <div class="stats-grid">
       <div class="stat-card">
         <h3>Total Trades</h3>
@@ -53,7 +58,7 @@
       </div>
       <div class="stat-card">
         <h3>Average RR</h3>
-        <p id="avg-rr">1:a</p>
+        <p id="avg-rr">1:0</p>
       </div>
       <div class="stat-card">
         <h3>Best Trade</h3>
@@ -81,7 +86,7 @@
       </div>
     </div>
 
-    <!-- ✅ FILTER OPTIONS -->
+    <!-- FILTER OPTIONS -->
     <section class="filters">
       <h2>📊 Filter Your Trades</h2>
       <div class="filter-grid">
@@ -105,7 +110,7 @@
       </div>
     </section>
 
-    <!-- ✅ CHARTS -->
+    <!-- CHARTS -->
     <div class="chart-tabs">
       <button class="tab-btn active" data-chart="profit">Profit/Loss</button>
       <button class="tab-btn" data-chart="equity">Equity Growth</button>
@@ -152,8 +157,9 @@
   </section>
 
   <footer>
-    <p>© 2025 TradeTrackFX. All Rights Reserved.</p>
+    <p>© 2026 TradeTrackFX. All Rights Reserved.</p>
   </footer>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -166,8 +172,13 @@
   <script src="chart.js" defer></script>
   <script src="stats.js" defer></script>
   <script src="calendar.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="calendar-styles.css">
+
+  <script>
+    // Mobile nav toggle
+    document.getElementById('navToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  </script>
 </body>
 
 </html>

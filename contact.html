@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact & Social | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .contact-hero {
+            text-align: center;
+            padding: 80px 20px 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-hero h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact-hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px 60px;
+        }
+
+        .contact-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px 30px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .contact-card.instagram:hover {
+            border-color: #E1306C;
+            box-shadow: 0 20px 60px rgba(225, 48, 108, 0.2);
+        }
+
+        .contact-card.tiktok:hover {
+            border-color: #69C9D0;
+            box-shadow: 0 20px 60px rgba(105, 201, 208, 0.2);
+        }
+
+        .contact-card.twitter:hover {
+            border-color: #1DA1F2;
+            box-shadow: 0 20px 60px rgba(29, 161, 242, 0.2);
+        }
+
+        .contact-card.email:hover {
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+        }
+
+        .social-icon {
+            font-size: 3.5rem;
+            margin-bottom: 18px;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .contact-card:hover .social-icon {
+            transform: scale(1.15);
+        }
+
+        .contact-card h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .contact-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .contact-handle {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 8px 20px;
+            background: rgba(0, 212, 255, 0.08);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .contact-card.instagram .contact-handle {
+            color: #E1306C;
+            background: rgba(225, 48, 108, 0.08);
+            border-color: rgba(225, 48, 108, 0.2);
+        }
+
+        .contact-card.tiktok .contact-handle {
+            color: #69C9D0;
+            background: rgba(105, 201, 208, 0.08);
+            border-color: rgba(105, 201, 208, 0.2);
+        }
+
+        .contact-card:hover .contact-handle {
+            transform: scale(1.05);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            max-width: 700px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+        }
+
+        .faq-section h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px 25px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .faq-question {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s;
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            padding-top: 14px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 20px 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .contact-hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+    <div class="contact-hero">
+        <h1>Get in Touch 👋</h1>
+        <p>Follow us on social media for trading insights, app updates, and community challenges. We're also available
+            via email for support.</p>
+    </div>
+
+    <div class="contact-grid">
+
+        <!-- Instagram -->
+        <a class="contact-card instagram" href="https://www.instagram.com/tradetrackfx/" target="_blank" rel="noopener">
+            <span class="social-icon">📸</span>
+            <h3>Instagram</h3>
+            <p>Daily trading setups, journal tips, and community highlights.</p>
+            <span class="contact-handle">@tradetrackfx</span>
+        </a>
+
+        <!-- TikTok -->
+        <a class="contact-card tiktok" href="https://tiktok.com/@YOUR_TIKTOK_HERE" target="_blank" rel="noopener">
+            <span class="social-icon">🎵</span>
+            <h3>TikTok</h3>
+            <p>Short-form trading content, how-to videos, and live market reactions.</p>
+            <span class="contact-handle">@YOUR_TIKTOK_HERE</span>
+        </a>
+
+        <!-- Email / Support -->
+        <a class="contact-card email" href="support.html">
+            <span class="social-icon">📬</span>
+            <h3>Support & Feedback</h3>
+            <p>Having an issue? Reach out via our support portal and we'll respond within 24 hours.</p>
+            <span class="contact-handle">Open Support Ticket</span>
+        </a>
+
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+        <h2>❓ Frequently Asked Questions</h2>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+            <div class="faq-question">
+                How do I pay for a subscription?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Go to the Plans page and click "Get Pro Monthly" or "Save with Annual". You'll be
+                redirected to Paystack's secure checkout page where you can pay via M-Pesa or card. Once payment is
+                confirmed, your subscription activates automatically.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+            <div class="faq-question">
+                Is my data secure?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Yes. Your data is stored on Google Firebase (Firestore), encrypted at rest and in
+                transit. We use Firebase Security Rules to ensure only you can access your trade journal data. Payments
+                are handled entirely by Paystack — we never see your card or M-Pesa credentials.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+            <div class="faq-question">
+                What happens when my subscription expires?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">You get a 3-day grace period after expiry where your premium features remain
+                accessible. After that, your account reverts to the Free plan — but your data is never deleted. Simply
+                renew to regain full access.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+            <div class="faq-question">
+                Does the app work on iPhone and iPad?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Yes! TradeTrackFX is fully optimized for iOS Safari on both iPhone and iPad. If you
+                experience any loading issues, please clear your browser cache and try again. You can also add the app
+                to your home screen for a native app-like experience.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+            <div class="faq-question">
+                Can I cancel my subscription?
+                <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-answer">Subscriptions are manual (not recurring auto-billing). You won't be charged again
+                unless you manually purchase another cycle. Just don't renew when it expires and you'll naturally return
+                to the free plan.</div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFAQ(el) {
+            const isOpen = el.classList.contains('open');
+            document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+            if (!isOpen) el.classList.add('open');
+        }
+    </script>
+</body>
+
+</html>

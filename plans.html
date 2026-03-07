@@ -7,23 +7,99 @@
     <title>Upgrade Plan | TradeTrackFX</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .plans-container {
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 0 20px;
+        body {
+            background: var(--bg-main);
+        }
+
+        .plans-header {
             text-align: center;
+            padding: 60px 20px 0;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .plans-header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .plans-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Subscription Status Banner */
+        #sub-status-banner {
+            max-width: 1050px;
+            margin: 30px auto 0;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .status-card.active {
+            border-color: rgba(0, 255, 163, 0.4);
+        }
+
+        .status-card.grace {
+            border-color: rgba(255, 200, 0, 0.4);
+        }
+
+        .status-card.expired {
+            border-color: rgba(255, 77, 77, 0.4);
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .status-detail {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .status-detail strong {
+            color: var(--text-main);
+        }
+
+        /* Plans Grid */
+        .plans-container {
+            max-width: 1050px;
+            margin: 50px auto;
+            padding: 0 20px;
         }
 
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
             gap: 30px;
-            margin-top: 50px;
         }
 
         .plan-card {
             background: var(--bg-card);
-            padding: 40px;
+            padding: 40px 35px;
             border-radius: 24px;
             border: 1px solid var(--border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -31,12 +107,23 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .plan-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
         }
 
         .plan-card.featured {
             border-color: var(--primary);
             box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
-            transform: scale(1.05);
+            transform: scale(1.03);
+        }
+
+        .plan-card.featured:hover {
+            transform: scale(1.03) translateY(-6px);
         }
 
         .plan-card.featured::before {
@@ -44,52 +131,92 @@
             position: absolute;
             top: 20px;
             right: -30px;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: #000;
             padding: 5px 40px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 800;
+            letter-spacing: 1.5px;
             transform: rotate(45deg);
         }
 
         .plan-name {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            color: #fff;
         }
 
         .plan-price {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 800;
-            margin: 20px 0;
+            margin: 18px 0 6px;
             color: #fff;
         }
 
         .plan-price span {
             font-size: 1rem;
             color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .plan-usd {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .plan-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
         }
 
         .plan-features {
             list-style: none;
             padding: 0;
-            margin: 30px 0;
-            text-align: left;
             flex: 1;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            margin-bottom: 30px;
         }
 
         .plan-features li {
-            padding: 12px 0;
+            padding: 10px 0;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .plan-features li::before {
             content: '✓';
             color: var(--primary);
-            font-weight: 700;
+            font-weight: 900;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .plan-features li.locked {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .plan-features li.locked::before {
+            content: '✗';
+            color: #888;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .plan-btn {
@@ -97,97 +224,217 @@
             padding: 16px;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
             border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+
+        .plan-btn:hover::after {
+            width: 300px;
+            height: 300px;
         }
 
         .plan-btn.primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
+            color: #000;
+            font-weight: 800;
         }
 
         .plan-btn.secondary {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             color: #fff;
             border: 1px solid var(--border);
         }
 
-        .plan-btn:hover {
-            transform: translateY(-3px);
-            filter: brightness(1.1);
+        .plan-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
-        .current-plan-badge {
-            background: rgba(0, 230, 118, 0.1);
-            color: #00E676;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-top: 10px;
-            display: inline-block;
+        /* Paystack secure badge */
+        .paystack-badge {
+            text-align: center;
+            margin-top: 40px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        .paystack-badge img {
+            height: 20px;
+            vertical-align: middle;
+            margin: 0 6px;
+        }
+
+        /* Loading overlay */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        #loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 212, 255, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Nav back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 20px 20px 0;
+            display: block;
+        }
+
+        .back-link:hover {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .plans-header h1 {
+                font-size: 2rem;
+            }
+
+            .plan-card.featured {
+                transform: none;
+            }
+
+            .plan-card.featured:hover {
+                transform: translateY(-6px);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="plans-container">
-        <h1 style="font-size: 3rem; font-weight: 900; margin-bottom: 10px;">Elevate Your Strategy</h1>
-        <p style="color: var(--text-muted); font-size: 1.2rem;">Choose the professional toolkit built for your growth.
-        </p>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="color: #fff; font-size: 1rem;">Redirecting to secure payment...</p>
+    </div>
 
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+    <div class="plans-header">
+        <h1>Elevate Your Trading</h1>
+        <p>Unlock advanced analytics, priority support, and unlimited journaling. Secure payments via Paystack (M-Pesa &
+            Card).</p>
+    </div>
+
+    <!-- Subscription Status Banner (shown when logged in) -->
+    <div id="sub-status-banner">
+        <div class="status-card" id="status-card">
+            <div>
+                <div class="status-label" id="status-label-text">--</div>
+                <div class="status-detail" id="status-detail-text">Loading subscription info...</div>
+            </div>
+            <div id="status-action"></div>
+        </div>
+    </div>
+
+    <div class="plans-container">
         <div class="pricing-grid">
             <!-- Free Plan -->
             <div class="plan-card">
                 <div class="plan-name">Free Tier</div>
-                <div class="plan-price">$0<span>/month</span></div>
-                <p style="color: var(--text-muted); font-size: 0.8rem; font-weight: 700;">LIMITED ACCESS</p>
+                <div class="plan-price">KES 0<span>/month</span></div>
+                <div class="plan-usd">Always free</div>
                 <ul class="plan-features">
                     <li>Basic Trade Journaling</li>
-                    <li>Limited Statistics</li>
+                    <li>Dashboard Stats</li>
                     <li>Community Support</li>
-                    <li>Single Device Access</li>
+                    <li class="locked">Advanced Analytics</li>
+                    <li class="locked">Export CSV / Excel</li>
+                    <li class="locked">Priority Support</li>
+                    <li class="locked">All Charts & Calendar</li>
                 </ul>
-                <button class="plan-btn secondary" id="btn-free">Current Plan</button>
+                <button class="plan-btn secondary" id="btn-free" disabled>Current Plan</button>
             </div>
 
-            <!-- Pro Monthly Plan -->
+            <!-- Pro Monthly -->
             <div class="plan-card featured">
                 <div class="plan-name">Pro Monthly</div>
-                <div class="plan-price">$15<span>/month</span></div>
+                <div class="plan-price">KES 1,300<span>/month</span></div>
+                <div class="plan-usd">≈ $10 USD/month</div>
                 <ul class="plan-features">
+                    <li>Everything in Free</li>
                     <li>Advanced Analytics Suite</li>
-                    <li>Screenshot Cloud Storage</li>
+                    <li>Export to CSV / Excel</li>
+                    <li>Trading Calendar</li>
                     <li>Priority Support Tickets</li>
                     <li>Multi-device Real-time Sync</li>
-                    <li>Export to CSV/Excel</li>
+                    <li>Unlimited Journals</li>
                 </ul>
-                <button class="plan-btn primary" id="btn-monthly">Get Started</button>
+                <button class="plan-btn primary" id="btn-monthly" onclick="initPayment('pro_monthly')">
+                    🚀 Get Pro Monthly
+                </button>
             </div>
 
-            <!-- Pro Annual Plan -->
+            <!-- Pro Annual -->
             <div class="plan-card">
                 <div class="plan-name">Pro Annual</div>
-                <div class="plan-price">$110<span>/year</span></div>
-                <p style="color: var(--primary); font-size: 0.8rem; font-weight: 700;">BEST VALUE - SAVE $70</p>
+                <div class="plan-price">KES 13,000<span>/year</span></div>
+                <div class="plan-usd">≈ $100 USD/year · Save ~2 months</div>
+                <div class="plan-badge" style="color: var(--primary);">⭐ BEST VALUE</div>
                 <ul class="plan-features">
                     <li>All Pro Monthly Features</li>
-                    <li>Early Access to Beta Tools</li>
+                    <li>Early Beta Feature Access</li>
                     <li>VIP Support Channel</li>
-                    <li>No Data Limits</li>
+                    <li>No Data Limits Ever</li>
+                    <li>Dedicated Account Manager</li>
+                    <li>Yearly Performance Report</li>
+                    <li>Priority Feature Requests</li>
                 </ul>
-                <button class="plan-btn secondary" id="btn-annual">Save with Yearly</button>
+                <button class="plan-btn secondary" id="btn-annual" onclick="initPayment('pro_annual')">
+                    💎 Save with Annual
+                </button>
             </div>
         </div>
 
-        <p style="margin-top: 40px; color: #555; font-size: 0.9rem;">
-            Payments are simulated for this demonstration. Clicking a plan will update your account status instantly.
-        </p>
-        <div style="margin-top: 20px;">
-            <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">← Back to
-                Dashboard</a>
+        <!-- Secure payment note -->
+        <div class="paystack-badge">
+            🔒 Secured by Paystack &nbsp;|&nbsp; M-Pesa &amp; Card Accepted &nbsp;|&nbsp; KES Currency
         </div>
     </div>
 
@@ -195,38 +442,123 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            auth.onAuthStateChanged(user => {
-                if (!user) {
-                    window.location.href = 'login.html';
+        const PLAN_NAMES = {
+            free: 'Free Tier',
+            pro_monthly: 'Pro Monthly',
+            pro_annual: 'Pro Annual'
+        };
+
+        let currentUser = null;
+
+        // ── Listen for auth state and load subscription info ──────────────────
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = user;
+            loadSubscriptionStatus(user);
+        });
+
+        async function loadSubscriptionStatus(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const banner = document.getElementById('sub-status-banner');
+                const card = document.getElementById('status-card');
+                const labelEl = document.getElementById('status-label-text');
+                const detailEl = document.getElementById('status-detail-text');
+                const actionEl = document.getElementById('status-action');
+
+                banner.style.display = 'block';
+
+                if (!userDoc.exists || !userDoc.data().plan || userDoc.data().plan === 'free') {
+                    card.className = 'status-card';
+                    labelEl.textContent = '🆓 Current Plan: Free';
+                    detailEl.innerHTML = 'Upgrade to Pro for full access to all features.';
+                    document.getElementById('btn-free').textContent = '✓ Current Plan';
                     return;
                 }
 
-                // Track buttons
-                const plans = {
-                    'btn-free': 'Free',
-                    'btn-monthly': 'Pro Monthly',
-                    'btn-annual': 'Pro Annual'
-                };
+                const data = userDoc.data();
+                const status = data.status || 'active';
+                const plan = data.plan;
+                const expiresAt = data.expiresAt ? data.expiresAt.toDate() : null;
 
-                Object.keys(plans).forEach(id => {
-                    document.getElementById(id).addEventListener('click', async () => {
-                        try {
-                            await db.collection('users').doc(user.uid).set({
-                                subscription: plans[id]
-                            }, { merge: true });
-                            alert(`Plan upgraded to ${plans[id]} successfully!`);
-                            window.location.href = 'index.html';
-                        } catch (e) {
-                            alert('Update failed: ' + e.message);
-                        }
-                    });
-                });
+                const expiryStr = expiresAt
+                    ? expiresAt.toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'N/A';
+
+                card.className = `status-card ${status}`;
+
+                if (status === 'active') {
+                    labelEl.textContent = `✅ ${PLAN_NAMES[plan] || plan} — Active`;
+                    labelEl.style.color = '#00E676';
+                    detailEl.innerHTML = `Your subscription renews / expires on <strong>${expiryStr}</strong>.`;
+                    actionEl.innerHTML = ``;
+                    // Disable plan buttons they already own
+                    if (plan === 'pro_monthly') document.getElementById('btn-monthly').textContent = '✓ Current Plan';
+                    if (plan === 'pro_annual') document.getElementById('btn-annual').textContent = '✓ Current Plan';
+                } else if (status === 'grace') {
+                    labelEl.textContent = '⚠️ Grace Period — Renew Now!';
+                    labelEl.style.color = '#FFC107';
+                    detailEl.innerHTML = `Your plan expired on <strong>${expiryStr}</strong>. You have a 3-day grace period.`;
+                    actionEl.innerHTML = `<button onclick="initPayment('pro_monthly')" class="plan-btn primary" style="width: auto; padding: 10px 20px; font-size: 0.85rem;">Renew Now</button>`;
+                } else {
+                    labelEl.textContent = '🔒 Subscription Expired';
+                    labelEl.style.color = '#FF5252';
+                    detailEl.innerHTML = `Your premium plan expired on <strong>${expiryStr}</strong>. Subscribe to regain access.`;
+                }
+
+            } catch (err) {
+                console.warn('Could not load subscription status:', err.message);
+            }
+        }
+
+        // ── Init Paystack Payment ─────────────────────────────────────────────
+        async function initPayment(plan) {
+            if (!currentUser) {
+                alert('Please log in first.');
+                return;
+            }
+
+            // Show loading overlay
+            document.getElementById('loading-overlay').classList.add('show');
+
+            // Disable buttons
+            ['btn-monthly', 'btn-annual'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = true;
             });
-        });
+
+            try {
+                const functions = firebase.functions();
+                const createTransaction = functions.httpsCallable('createPaystackTransaction');
+
+                const result = await createTransaction({
+                    planPurchased: plan,
+                    email: currentUser.email
+                });
+
+                const { authorization_url } = result.data;
+
+                // Redirect to Paystack hosted checkout
+                window.location.href = authorization_url;
+
+            } catch (err) {
+                console.error('Payment init failed:', err);
+                document.getElementById('loading-overlay').classList.remove('show');
+                ['btn-monthly', 'btn-annual'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = false;
+                });
+                alert('Could not start payment: ' + (err.message || 'Unknown error. Please try again.'));
+            }
+        }
     </script>
 </body>
 

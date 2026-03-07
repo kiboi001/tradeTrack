@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status | TradeTrackFX</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .callback-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .callback-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .callback-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .callback-card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 1s ease-in-out infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-dash {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            font-weight: 700;
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .btn-sec {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="callback-container">
+        <div class="callback-card" id="status-card">
+            <div class="status-icon" id="status-icon">⏳</div>
+            <h2 id="status-title">Confirming Payment...</h2>
+            <p id="status-message">
+                <span class="pulse-dot"></span>
+                We're waiting for payment confirmation. This usually takes a few seconds for card payments,
+                and up to 60 seconds for M-Pesa. Please don't close this page.
+            </p>
+            <div class="action-btns" id="action-btns" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // ── Poll Firestore for subscription activation (set by webhook) ────────
+        const MAX_POLL_SECONDS = 90;
+        let pollInterval = null;
+        let pollCount = 0;
+        let unsubscribeSnapshot = null;
+
+        function showSuccess(planName) {
+            document.getElementById('status-icon').textContent = '🎉';
+            document.getElementById('status-title').textContent = 'Subscription Activated!';
+            document.getElementById('status-message').innerHTML =
+                `Welcome to <strong>${planName}</strong>! Your premium features are now unlocked.`;
+            document.getElementById('action-btns').style.display = 'flex';
+            document.getElementById('action-btns').innerHTML = `
+                <a href="index.html" class="btn-dash">Go to Dashboard</a>
+                <a href="plans.html" class="btn-sec">View Subscription</a>
+            `;
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+            if (pollInterval) clearInterval(pollInterval);
+        }
+
+        function showTimeout() {
+            document.getElementById('status-icon').textContent = '⚠️';
+            document.getElementById('status-title').textContent = 'Waiting for Confirmation';
+            document.getElementById('status-message').innerHTML =
+                `Your payment may still be processing (especially for M-Pesa). 
+                Check your subscription status later on the <a href="plans.html" style="color: var(--primary);">Plans page</a>. 
+                If money was deducted but not activated, contact support.`;
+            document.getElementById('action-btns').style.display = 'flex';
+            document.getElementById('action-btns').innerHTML = `
+                <a href="index.html" class="btn-dash">Go to Dashboard</a>
+                <a href="support.html" class="btn-sec">Contact Support</a>
+            `;
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+            if (pollInterval) clearInterval(pollInterval);
+        }
+
+        function showCancelled() {
+            document.getElementById('status-icon').textContent = '❌';
+            document.getElementById('status-title').textContent = 'Payment Cancelled';
+            document.getElementById('status-message').innerHTML =
+                `Your payment was not completed. You can try again anytime.`;
+            document.getElementById('action-btns').style.display = 'flex';
+            document.getElementById('action-btns').innerHTML = `
+                <a href="plans.html" class="btn-dash">Try Again</a>
+                <a href="index.html" class="btn-sec">Back to Dashboard</a>
+            `;
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Check URL params from Paystack redirect
+            const params = new URLSearchParams(window.location.search);
+            const trxref = params.get('trxref');
+            const paystackRef = params.get('reference');
+
+            // Paystack redirects with ?trxref= on cancel too
+            if (!trxref && !paystackRef) {
+                showCancelled();
+                return;
+            }
+
+            // Use Firestore real-time listener to detect activation
+            unsubscribeSnapshot = db.collection('users').doc(user.uid)
+                .onSnapshot((doc) => {
+                    if (!doc.exists) return;
+                    const data = doc.data();
+                    if (data.status === 'active' && data.plan !== 'free') {
+                        const PLAN_NAMES = { pro_monthly: 'Pro Monthly', pro_annual: 'Pro Annual' };
+                        showSuccess(PLAN_NAMES[data.plan] || data.plan);
+                    }
+                });
+
+            // Fallback: timeout after MAX_POLL_SECONDS
+            setTimeout(() => {
+                if (document.getElementById('status-title').textContent === 'Confirming Payment...') {
+                    showTimeout();
+                }
+            }, MAX_POLL_SECONDS * 1000);
+        });
+    </script>
+</body>
+
+</html>

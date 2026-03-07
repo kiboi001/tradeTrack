@@ -4,7 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TradeTrackFX Dashboard</title>
+  <meta name="description"
+    content="TradeTrackFX — The premium forex trading journal. Log trades, track performance, analyse statistics and grow as a disciplined trader." />
+  <title>TradeTrackFX | Dashboard</title>
+  <link rel="icon" href="2.jpg" type="image/jpeg" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -21,7 +24,9 @@
         <li><a href="journal.html">📓 Journal</a></li>
         <li><a href="stats.html">📊 Stats</a></li>
         <li><a href="transactions.html">💰 Transactions</a></li>
+        <li><a href="reminders.html">🔔 Reminders</a></li>
         <li><a href="support.html">🎫 Support</a></li>
+        <li><a href="contact.html">🌐 Contact</a></li>
         <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
       </ul>
       <button onclick="window.authLogout()" class="reset-btn"
@@ -81,8 +86,43 @@
         </div>
       </section>
 
+      <!-- Loading skeleton (shown while Firebase loads) -->
+      <div id="loading-overlay" style="
+        position: fixed; inset: 0; background: rgba(11,14,17,0.85);
+        backdrop-filter: blur(6px); z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+      ">
+        <div
+          style="width: 48px; height: 48px; border: 3px solid rgba(0,212,255,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;">
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem; letter-spacing: 0.5px;">Loading your journal…</p>
+      </div>
+
+      <!-- Onboarding card (shown only when user has 0 trades) -->
+      <div id="onboarding-card" style="
+        display: none;
+        background: var(--bg-card); border: 1px solid rgba(0,212,255,0.2);
+        border-radius: 24px; padding: 3rem 2rem; text-align: center;
+        box-shadow: 0 0 40px rgba(0,212,255,0.06); margin-bottom: 2rem;
+      ">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">📓</div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;">Welcome to TradeTrackFX!</h2>
+        <p style="color: var(--text-muted); max-width: 420px; margin: 0 auto 1.5rem;">Your journal is empty. Start
+          logging trades to see your stats, charts, and performance insights here.</p>
+        <a href="journal.html" style="
+          display: inline-block;
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
+          color: #fff; text-decoration: none; padding: 12px 28px;
+          border-radius: 12px; font-weight: 700; font-size: 1rem;
+          box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+          transition: transform 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          ➕ Log Your First Trade
+        </a>
+      </div>
+
       <!-- Recent Trades Dashboard -->
-      <section style="margin-top: 3rem;">
+      <section id="recent-trades-section" style="margin-top: 3rem; display: none;">
         <h2 style="margin-bottom: 1.5rem; font-size: 1.8rem;">📉 Recent Trades</h2>
         <div style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
           <h3 style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">
@@ -114,12 +154,35 @@
           month: "long",
           day: "numeric",
         });
+
+      // Spin animation for loader
+      const loadStyle = document.createElement('style');
+      loadStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(loadStyle);
+
+      // Hide loader + show correct section after data loads
+      window.onDashboardReady = function (tradeCount) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        if (tradeCount === 0) {
+          document.getElementById('onboarding-card').style.display = 'block';
+        } else {
+          document.getElementById('recent-trades-section').style.display = 'block';
+        }
+      };
+
+      // Fallback: hide loader after 6 seconds even if data didn't arrive
+      setTimeout(() => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+        document.getElementById('recent-trades-section').style.display = 'block';
+      }, 6000);
     </script>
-    <!-- Firebase SDK (Compat version for easier integration) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 
