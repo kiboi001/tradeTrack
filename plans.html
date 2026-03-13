@@ -354,7 +354,26 @@
         <p style="color: #fff; font-size: 1rem;">Redirecting to secure payment...</p>
     </div>
 
-    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="2.jpg" alt="logo" class="logo-image">
+            <span class="logo-text">TradeTrackFX</span>
+        </div>
+        <button class="menu-toggle" id="navToggle">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="journal.html">📓 Journal</a></li>
+            <li><a href="stats.html">📊 Stats</a></li>
+            <li><a href="transactions.html">Wallet</a></li>
+            <li><a href="reminders.html">🔔 Reminders</a></li>
+            <li><a href="support.html">Support</a></li>
+            <li><a href="contact.html">🌐 Contact</a></li>
+            <li><a href="plans.html" class="nav-active" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a>
+            </li>
+            <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
+        </ul>
+    </nav>
 
     <div class="plans-header">
         <h1>Elevate Your Trading</h1>
@@ -559,6 +578,12 @@
                 alert('Could not start payment: ' + (err.message || 'Unknown error. Please try again.'));
             }
         }
+    </script>
+    <script>
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
     </script>
 </body>
 

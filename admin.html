@@ -10,9 +10,9 @@
         :root {
             --primary: #00ff88;
             --primary-dark: #00bd65;
-            --bg: #0d1117;
-            --bg-card: rgba(22, 27, 34, 0.7);
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #000000;
+            --bg-card: rgba(10, 15, 25, 0.8);
+            --border: rgba(255, 255, 255, 0.04);
             --text-muted: #8b949e;
         }
 
@@ -25,14 +25,24 @@
             display: grid;
             grid-template-columns: 280px 1fr;
             height: 100vh;
-            background: radial-gradient(circle at top right, #161b22, #0d1117);
+            background: #000000;
             color: #c9d1d9;
+            position: relative;
+        }
+
+        .admin-layout::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(30, 64, 175, 0.1), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Sidebar Glassmorphism */
         .admin-sidebar {
-            background: rgba(13, 17, 23, 0.8);
-            backdrop-filter: blur(20px);
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(24px);
             border-right: 1px solid var(--border);
             padding: 40px 24px;
             display: flex;
@@ -363,7 +373,7 @@
             <nav style="flex: 1;">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link">
+                        <a href="dashboard.html" class="nav-link">
                             <span style="font-size: 1.2rem;">←</span> Exit Portal
                         </a>
                     </li>

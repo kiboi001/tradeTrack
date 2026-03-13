@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="TradeTrackFX — The premium forex trading journal. Log trades, track performance, analyse statistics and grow as a disciplined trader." />
+  <title>TradeTrackFX | Dashboard</title>
+  <link rel="icon" href="2.jpg" type="image/jpeg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="layout">
+    <button class="menu-toggle" id="sidebarToggle">☰</button>
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <img src="2.jpg" alt="TradeTrackFX" />
+        <h2>TradeTrack<span>FX</span></h2>
+      </div>
+      <ul class="nav">
+        <li><a href="dashboard.html" class="active">🏠 Dashboard</a></li>
+        <li><a href="journal.html">📓 Journal</a></li>
+        <li><a href="stats.html">📊 Stats</a></li>
+        <li><a href="transactions.html">💰 Transactions</a></li>
+        <li><a href="reminders.html">🔔 Reminders</a></li>
+        <li><a href="support.html">🎫 Support</a></li>
+        <li><a href="contact.html">🌐 Contact</a></li>
+        <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
+      </ul>
+      <button onclick="window.authLogout()" class="reset-btn"
+        style="margin-top: 10px; background: rgba(255,255,255,0.05); color: #888;">
+        <span>🚪</span> Logout
+      </button>
+      <button onclick="window.resetAllData()" class="reset-btn" style="margin-top: 10px;">
+        <span>🗑️</span> Reset Data
+      </button>
+    </aside>
+    <main class="content">
+      <header>
+        <div class="dashboard-branding">
+          <h1 class="brand-title">
+            <span class="brand-gradient">Trade</span><span class="brand-highlight">Track</span><span
+              class="brand-gradient">FX</span>
+          </h1>
+          <div class="brand-badge">Premium Trading Journal</div>
+        </div>
+        <div class="date-display">
+          <div class="date-icon">📅</div>
+          <div class="date-content">
+            <div class="date-day" id="dayOfWeek"></div>
+            <div class="date-full" id="date"></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="cards">
+        <div class="card">
+          <h3>Account Balance</h3>
+          <p class="value" id="accountBalance">$0.00</p>
+          <div class="balance-actions" style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+            <a href="transactions.html"
+              style="background: linear-gradient(135deg, var(--primary), #0077cc); color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">Fund
+              Account</a>
+            <div class="initial-bal-hint" style="font-size: 0.75rem; color: #888;">
+              Initial: <span id="initialBalanceDisplay">$0.00</span>
+            </div>
+          </div>
+          <input type="hidden" id="initialBalanceInput">
+        </div>
+
+        <div class="card">
+          <h3>Total Profit</h3>
+          <p class="value profit" id="totalProfit">+$0</p>
+        </div>
+
+        <div class="card">
+          <h3>Win Rate</h3>
+          <p class="value" id="winRate">0%</p>
+        </div>
+
+        <div class="card">
+          <h3>Total Trades</h3>
+          <p class="value" id="totalTrades">0</p>
+        </div>
+      </section>
+
+      <!-- Loading skeleton (shown while Firebase loads) -->
+      <div id="loading-overlay" style="
+        position: fixed; inset: 0; background: #000000;
+        backdrop-filter: blur(6px); z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+      ">
+        <div
+          style="width: 48px; height: 48px; border: 3px solid rgba(0,212,255,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;">
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem; letter-spacing: 0.5px;">Loading your journal…</p>
+      </div>
+
+      <!-- Onboarding card (shown only when user has 0 trades) -->
+      <div id="onboarding-card" style="
+        display: none;
+        background: var(--bg-card); border: 1px solid rgba(0,212,255,0.2);
+        border-radius: 24px; padding: 3rem 2rem; text-align: center;
+        box-shadow: 0 0 40px rgba(0,212,255,0.06); margin-bottom: 2rem;
+      ">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">📓</div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem;">Welcome to TradeTrackFX!</h2>
+        <p style="color: var(--text-muted); max-width: 420px; margin: 0 auto 1.5rem;">Your journal is empty. Start
+          logging trades to see your stats, charts, and performance insights here.</p>
+        <a href="journal.html" style="
+          display: inline-block;
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
+          color: #fff; text-decoration: none; padding: 12px 28px;
+          border-radius: 12px; font-weight: 700; font-size: 1rem;
+          box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+          transition: transform 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          ➕ Log Your First Trade
+        </a>
+      </div>
+
+      <!-- Recent Trades Dashboard -->
+      <section id="recent-trades-section" style="margin-top: 3rem; display: none;">
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.8rem;">📉 Recent Trades</h2>
+        <div style="background: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+          <h3 style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">
+            Latest 5 Performance</h3>
+          <div id="recent-trades-log" style="max-height: 400px; overflow-y: auto;">
+            <p style="color: #888; text-align: center;">No trades recorded yet</p>
+          </div>
+          <div style="text-align: center; margin-top: 15px;">
+            <a href="journal.html"
+              style="color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 600;">View All
+              Journal Entries →</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <script>
+      const today = new Date();
+
+      // Day of week
+      document.getElementById("dayOfWeek").textContent =
+        today.toLocaleDateString("en-US", { weekday: "long" });
+
+      // Full date
+      document.getElementById("date").textContent =
+        today.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+      // Spin animation for loader
+      const loadStyle = document.createElement('style');
+      loadStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(loadStyle);
+
+      // Hide loader + show correct section after data loads
+      window.onDashboardReady = function (tradeCount) {
+        document.getElementById('loading-overlay').style.display = 'none';
+        if (tradeCount === 0) {
+          document.getElementById('onboarding-card').style.display = 'block';
+        } else {
+          document.getElementById('recent-trades-section').style.display = 'block';
+        }
+      };
+
+      // Fallback: hide loader after 6 seconds even if data didn't arrive
+      setTimeout(() => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+        document.getElementById('recent-trades-section').style.display = 'block';
+      }, 6000);
+    </script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <script src="scripts.js" defer></script>
+    <script src="dashboard.js" defer></script>
+</body>
+
+</html>

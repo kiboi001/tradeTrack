@@ -153,7 +153,7 @@
                 `Welcome to <strong>${planName}</strong>! Your premium features are now unlocked.`;
             document.getElementById('action-btns').style.display = 'flex';
             document.getElementById('action-btns').innerHTML = `
-                <a href="index.html" class="btn-dash">Go to Dashboard</a>
+                <a href="dashboard.html" class="btn-dash">Go to Dashboard</a>
                 <a href="plans.html" class="btn-sec">View Subscription</a>
             `;
             if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -169,7 +169,7 @@
                 If money was deducted but not activated, contact support.`;
             document.getElementById('action-btns').style.display = 'flex';
             document.getElementById('action-btns').innerHTML = `
-                <a href="index.html" class="btn-dash">Go to Dashboard</a>
+                <a href="dashboard.html" class="btn-dash">Go to Dashboard</a>
                 <a href="support.html" class="btn-sec">Contact Support</a>
             `;
             if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -184,7 +184,7 @@
             document.getElementById('action-btns').style.display = 'flex';
             document.getElementById('action-btns').innerHTML = `
                 <a href="plans.html" class="btn-dash">Try Again</a>
-                <a href="index.html" class="btn-sec">Back to Dashboard</a>
+                <a href="dashboard.html" class="btn-sec">Back to Dashboard</a>
             `;
         }
 

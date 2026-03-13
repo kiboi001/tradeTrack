@@ -214,7 +214,25 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="2.jpg" alt="logo" class="logo-image">
+            <span class="logo-text">TradeTrackFX</span>
+        </div>
+        <button class="menu-toggle" id="navToggle">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="journal.html">📓 Journal</a></li>
+            <li><a href="stats.html">📊 Stats</a></li>
+            <li><a href="transactions.html">Wallet</a></li>
+            <li><a href="reminders.html">🔔 Reminders</a></li>
+            <li><a href="support.html">Support</a></li>
+            <li><a href="contact.html" class="nav-active">🌐 Contact</a></li>
+            <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
+            <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
+        </ul>
+    </nav>
 
     <div class="contact-hero">
         <h1>Get in Touch 👋</h1>
@@ -305,7 +323,20 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="scripts.js" defer></script>
+
     <script>
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
         function toggleFAQ(el) {
             const isOpen = el.classList.contains('open');
             document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));

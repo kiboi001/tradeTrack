@@ -19,16 +19,20 @@
         auth.onAuthStateChanged((user) => {
             const rawPath = window.location.pathname.toLowerCase();
 
-            // Precise matching for login pages
-            const isStandardLogin = rawPath.endsWith('login.html') || rawPath.endsWith('/') || rawPath === '';
-            const isAdminPage = rawPath.includes('admin'); // Protects admin.html and admin-login.html
+            // Precise matching for public and protected pages
+            const isLandingPage = rawPath.endsWith('index.html') || rawPath.endsWith('/') || rawPath === '';
+            const isLoginPage = rawPath.endsWith('login.html');
+            const isAdminPage = rawPath.includes('admin');
+
+            const isPublicPage = isLandingPage || isLoginPage;
 
             if (user) {
                 console.log('Firebase Auth: User is logged in as', user.email);
 
-                // If on standard login page, send to dashboard
-                if (isStandardLogin && !isAdminPage) {
-                    window.location.href = 'index.html';
+                // If on login page, send to dashboard. 
+                // We allow them to browse index.html even if logged in, or we can redirect there too.
+                if (isLoginPage && !isAdminPage) {
+                    window.location.href = 'dashboard.html';
                 }
 
                 // Fix race condition: Scripts.js might not be loaded yet
@@ -39,8 +43,8 @@
                 }
             } else {
                 console.log('Firebase Auth: No user session found.');
-                // Protect non-login pages
-                if (!isStandardLogin && !isAdminPage) {
+                // Protect internal pages (not public, not admin)
+                if (!isPublicPage && !isAdminPage) {
                     window.location.href = 'login.html';
                 }
             }

@@ -4,20 +4,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Midnight Neon Palette */
-  --bg-main: #0b0e11;
-  --bg-card: rgba(23, 27, 34, 0.7);
+  /* Midnight Black Palette */
+  --bg-main: #000000;
+  --bg-card: rgba(10, 15, 25, 0.8);
   --primary: #00d4ff;
-  --primary-glow: rgba(0, 212, 255, 0.3);
+  --primary-glow: rgba(0, 212, 255, 0.15);
   --secondary: #7042ff;
   --success: #00ffa3;
   --danger: #ff4d4d;
-  --text-main: #e2e8f0;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass: blur(12px);
-  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  --border: rgba(255, 255, 255, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass: blur(16px);
+  --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
 }
 
 * {
@@ -32,8 +32,8 @@
 body {
   background-color: var(--bg-main);
   background-image:
-    radial-gradient(circle at 0% 0%, rgba(112, 66, 255, 0.15) 0%, transparent 35%),
-    radial-gradient(circle at 100% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 35%);
+    radial-gradient(circle at 0% 0%, rgba(30, 64, 175, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 100% 100%, rgba(112, 66, 255, 0.05) 0%, transparent 35%);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -51,7 +51,7 @@ body::after {
   width: 80vw;
   height: 80vh;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(30, 64, 175, 0.08), transparent 70%);
   filter: blur(80px);
   z-index: -1;
   animation: drift 20s infinite alternate ease-in-out;
@@ -61,14 +61,14 @@ body::after {
 body::before {
   top: -20%;
   left: -10%;
-  background: radial-gradient(circle, rgba(112, 66, 255, 0.15), transparent 70%);
+  background: radial-gradient(circle, rgba(30, 64, 175, 0.1), transparent 70%);
 }
 
 body::after {
   bottom: -20%;
   right: -10%;
   animation-delay: -10s;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.1), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.06), transparent 70%);
 }
 
 @keyframes drift {

@@ -15,18 +15,34 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle at top right, #1a1a2e, #16213e);
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 70% 30%, rgba(30, 64, 175, 0.15), transparent 60%);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .auth-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 15, 25, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             width: 100%;
             max-width: 400px;
             text-align: center;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
         }
 
         .auth-card h2 {
@@ -170,11 +186,14 @@
                 <span id="toggle-text">Don't have an account? <span onclick="toggleMode()">Sign Up</span></span>
             </div>
 
-            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                <button onclick="checkConnection()"
-                    style="background: none; border: 1px solid rgba(255,255,255,0.1); color: #555; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; cursor: pointer;">🛠️
-                    Check Connection</button>
+            <div style="margin-top: 15px;">
+                <a href="index.html"
+                    style="color: #8899a6; text-decoration: none; font-size: 0.85rem; transition: color 0.3s;"
+                    onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='#8899a6'">← Back to
+                    Home</a>
             </div>
+
+
         </div>
     </div>
 
@@ -216,15 +235,7 @@
             }
         });
 
-        function checkConnection() {
-            if (typeof firebase === 'undefined') {
-                alert("❌ Firebase SDK: NOT LOADED");
-            } else if (typeof auth === 'undefined' || !auth) {
-                alert("❌ Firebase Auth: NOT INITIALIZED (Check API Key)");
-            } else {
-                alert("✅ Firebase is CONNECTED correctly!");
-            }
-        }
+
     </script>
 </body>
 
