@@ -64,7 +64,7 @@
                 .get();
 
             if (snap.empty) {
-                listEl.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">You haven\'t submitted any tickets yet.</p>';
+                listEl.innerHTML = '<p style="color: #666; text-align: center; padding: 30px;">🎫 No tickets available yet. Submit one above if you need help!</p>';
                 return;
             }
 
@@ -73,9 +73,9 @@
                 const date = t.createdAt ? t.createdAt.toDate().toLocaleDateString() : 'Pending...';
                 return `
                     <div class="ticket-item">
-                        <div>
-                            <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">${t.subject}</div>
-                            <div style="font-size: 0.8rem; color: #888;">${t.category.toUpperCase()} • ${date}</div>
+                        <div class="ticket-item-info">
+                            <div class="subject">${t.subject}</div>
+                            <div class="meta">${t.category.toUpperCase()} • ${date}</div>
                         </div>
                         <span class="status-pill status-${t.status}">${t.status}</span>
                     </div>
@@ -83,7 +83,7 @@
             }).join('');
         } catch (err) {
             console.error("Fetch tickets error:", err);
-            listEl.innerHTML = `<p style="color: #ff4d4d;">Error loading history: ${err.message}</p>`;
+            listEl.innerHTML = `<p style="color: #ff4d4d; text-align:center; padding: 20px;">⚠️ Could not load ticket history.</p>`;
         }
     }
 

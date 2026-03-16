@@ -13,7 +13,7 @@
         .support-container {
             max-width: 800px;
             margin: 40px auto;
-            padding: 0 20px;
+            padding: 0 20px 60px;
         }
 
         .ticket-form {
@@ -55,7 +55,11 @@
             border-radius: 12px;
             width: 100%;
             font-size: 1rem;
+            font-family: inherit;
             transition: border-color 0.3s;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         select:focus,
@@ -65,9 +69,14 @@
             outline: none;
         }
 
+        textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+
         .submit-btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: #fff;
             border: none;
@@ -77,6 +86,7 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
+            touch-action: manipulation;
         }
 
         .submit-btn:hover {
@@ -97,15 +107,36 @@
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ticket-item-info .subject {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .ticket-item-info .meta {
+            font-size: 0.8rem;
+            color: #888;
         }
 
         .status-pill {
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .status-open {
@@ -121,6 +152,44 @@
         .status-replied {
             background: rgba(0, 255, 163, 0.1);
             color: #00ffa3;
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 600px) {
+            .support-container {
+                margin: 20px auto;
+                padding: 0 14px 60px;
+            }
+
+            .ticket-form {
+                padding: 24px 20px;
+                border-radius: 16px;
+            }
+
+            .ticket-form h2 {
+                font-size: 1.6rem;
+            }
+
+            select,
+            input,
+            textarea {
+                padding: 13px 14px;
+                font-size: 0.95rem;
+            }
+
+            .submit-btn {
+                font-size: 1rem;
+                padding: 15px;
+            }
+
+            .ticket-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ticket-history h3 {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
