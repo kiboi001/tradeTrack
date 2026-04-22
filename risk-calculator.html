@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeTrackFX | Risk Calculator</title>
+    <meta name="description"
+        content="Calculate your optimal lot size, risk per trade, and visualize your reward-to-risk ratio with the TradeTrackFX Risk Calculator.">
+    <link rel="icon" href="2.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== RISK CALCULATOR PAGE ===== */
+        .risk-page {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+            padding-bottom: 80px;
+        }
+
+        .page-hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d4ff, #7042ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-hero p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* ===== CALCULATOR LAYOUTS ===== */
+        .calc-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .calc-section h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-field label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .calc-field input,
+        .calc-field select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .calc-field input:focus,
+        .calc-field select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .calc-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
+            width: 100%;
+        }
+
+        .calc-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        /* ===== RESULTS BOX ===== */
+        .result-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-card {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 16px;
+            padding: 1.2rem;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .result-card .r-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-card .r-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .result-card.green {
+            background: rgba(0, 214, 118, 0.05);
+            border-color: rgba(0, 214, 118, 0.2);
+        }
+
+        .result-card.green .r-value {
+            color: var(--success);
+        }
+
+        .result-card.red {
+            background: rgba(255, 82, 82, 0.05);
+            border-color: rgba(255, 82, 82, 0.2);
+        }
+
+        .result-card.red .r-value {
+            color: var(--danger);
+        }
+
+        /* ===== RR VISUALIZER ===== */
+        .rr-bar-wrap {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 48px;
+            display: flex;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .rr-risk-bar {
+            background: linear-gradient(to right, rgba(255, 82, 82, 0.6), rgba(255, 82, 82, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.5s ease;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .rr-reward-bar {
+            background: linear-gradient(to right, rgba(0, 214, 118, 0.3), rgba(0, 214, 118, 0.6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.5s ease;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* ===== SCENARIO TABLE ===== */
+        .scenario-table-wrap {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .scenario-table-wrap table {
+            background: transparent;
+            font-size: 0.88rem;
+        }
+
+        .scenario-table-wrap th {
+            background: rgba(0, 212, 255, 0.05);
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            padding: 12px 16px;
+        }
+
+        .scenario-table-wrap td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .positive-cell {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .negative-cell {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* ===== TIPS PANEL ===== */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tip-card {
+            background: rgba(112, 66, 255, 0.06);
+            border: 1px solid rgba(112, 66, 255, 0.15);
+            border-radius: 16px;
+            padding: 1.2rem;
+        }
+
+        .tip-card .tip-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .tip-card h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 6px;
+        }
+
+        .tip-card p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .risk-page {
+                width: 95%;
+            }
+
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <img src="2.jpg" alt="logo" class="logo-image">
+            <span class="logo-text">TradeTrackFX</span>
+        </div>
+        <button class="menu-toggle" id="navToggle">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="journal.html">📓 Journal</a></li>
+            <li><a href="stats.html">📊 Analytics</a></li>
+            <li><a href="risk-calculator.html" class="nav-active">🧮 Risk Calc</a></li>
+            <li><a href="transactions.html">Wallet</a></li>
+            <li><a href="reminders.html">🔔 Reminders</a></li>
+            <li><a href="plans.html" style="color: var(--primary); font-weight: 700;">💎 Get Pro</a></li>
+            <li><a href="#" onclick="window.authLogout(); return false;" style="color: #888;">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="risk-page">
+        <!-- Red hero morph shape -->
+        <div class="page-hero-shape hero-risk"></div>
+        <div class="page-hero">
+            <h1>🧮 Risk Calculator</h1>
+            <p>Calculate optimal position sizes and visualize your reward-to-risk before you trade</p>
+        </div>
+
+        <!-- ================================ -->
+        <!-- SECTION 1: LOT SIZE CALCULATOR  -->
+        <!-- ================================ -->
+        <div class="calc-section">
+            <h2>📐 Lot Size Calculator</h2>
+            <div class="calc-grid">
+                <div class="calc-field">
+                    <label>Account Balance ($)</label>
+                    <input type="number" id="ls-balance" placeholder="e.g. 10000" value="10000" min="0" step="100">
+                </div>
+                <div class="calc-field">
+                    <label>Risk Per Trade (%)</label>
+                    <input type="number" id="ls-risk-pct" placeholder="e.g. 1" value="1" min="0.1" max="100" step="0.1">
+                </div>
+                <div class="calc-field">
+                    <label>Stop Loss (pips)</label>
+                    <input type="number" id="ls-sl-pips" placeholder="e.g. 50" value="50" min="1" step="1">
+                </div>
+                <div class="calc-field">
+                    <label>Currency Pair Type</label>
+                    <select id="ls-pair-type">
+                        <option value="10">Major (e.g. EURUSD) — $10/pip std</option>
+                        <option value="1">Minor / JPY — $1/pip mini</option>
+                        <option value="0.63">XAUUSD (Gold) — ~$0.63/pip 0.01</option>
+                    </select>
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calcLotSize()">Calculate Lot Size</button>
+
+            <div class="result-box" id="ls-results" style="display:none;">
+                <div class="result-card">
+                    <div class="r-label">Risk Amount ($)</div>
+                    <div class="r-value red" id="ls-risk-amt">—</div>
+                </div>
+                <div class="result-card">
+                    <div class="r-label">Optimal Lot Size</div>
+                    <div class="r-value" id="ls-lot">—</div>
+                </div>
+                <div class="result-card green">
+                    <div class="r-label">Pip Value (per lot)</div>
+                    <div class="r-value green" id="ls-pip-val">—</div>
+                </div>
+                <div class="result-card">
+                    <div class="r-label">Max Loss if SL Hit</div>
+                    <div class="r-value red" id="ls-max-loss">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================ -->
+        <!-- SECTION 2: RR VISUALIZER        -->
+        <!-- ================================ -->
+        <div class="calc-section">
+            <h2>🎯 Risk:Reward Visualizer</h2>
+            <div class="calc-grid">
+                <div class="calc-field">
+                    <label>Entry Price</label>
+                    <input type="number" id="rr-entry" placeholder="e.g. 1.08500" step="0.00001">
+                </div>
+                <div class="calc-field">
+                    <label>Stop Loss Price</label>
+                    <input type="number" id="rr-sl" placeholder="e.g. 1.08000" step="0.00001">
+                </div>
+                <div class="calc-field">
+                    <label>Take Profit Price</label>
+                    <input type="number" id="rr-tp" placeholder="e.g. 1.09500" step="0.00001">
+                </div>
+                <div class="calc-field">
+                    <label>Direction</label>
+                    <select id="rr-direction">
+                        <option value="buy">Buy / Long</option>
+                        <option value="sell">Sell / Short</option>
+                    </select>
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calcRR()">Visualize R:R</button>
+
+            <div id="rr-results" style="display:none; margin-top: 1.5rem;">
+                <div class="result-box">
+                    <div class="result-card red">
+                        <div class="r-label">Risk (pips)</div>
+                        <div class="r-value red" id="rr-risk-pips">—</div>
+                    </div>
+                    <div class="result-card green">
+                        <div class="r-label">Reward (pips)</div>
+                        <div class="r-value green" id="rr-reward-pips">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="r-label">R:R Ratio</div>
+                        <div class="r-value" id="rr-ratio">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="r-label">Breakeven Win Rate</div>
+                        <div class="r-value" id="rr-be-winrate">—</div>
+                    </div>
+                </div>
+
+                <!-- Visual bar -->
+                <div style="margin-top: 1.2rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">
+                        <span>🔴 Risk</span>
+                        <span>🟢 Reward</span>
+                    </div>
+                    <div class="rr-bar-wrap">
+                        <div class="rr-risk-bar" id="rr-risk-bar" style="width: 50%;">Risk</div>
+                        <div class="rr-reward-bar" id="rr-reward-bar" style="width: 50%;">Reward</div>
+                    </div>
+                    <div id="rr-verdict"
+                        style="text-align: center; margin-top: 10px; font-size: 0.9rem; font-weight: 700;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================ -->
+        <!-- SECTION 3: MULTI-SCENARIO TABLE -->
+        <!-- ================================ -->
+        <div class="calc-section">
+            <h2>📊 Position Size Scenarios</h2>
+            <div class="calc-grid">
+                <div class="calc-field">
+                    <label>Account Balance ($)</label>
+                    <input type="number" id="sc-balance" placeholder="e.g. 10000" value="10000" min="0" step="100">
+                </div>
+                <div class="calc-field">
+                    <label>Stop Loss (pips)</label>
+                    <input type="number" id="sc-sl" placeholder="e.g. 30" value="30" min="1">
+                </div>
+                <div class="calc-field">
+                    <label>Pip Value per lot ($)</label>
+                    <input type="number" id="sc-pip-val" placeholder="e.g. 10" value="10" min="0.01" step="0.01">
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calcScenarios()">Generate Table</button>
+
+            <div class="scenario-table-wrap" id="sc-table-wrap" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Risk %</th>
+                            <th>Risk Amount ($)</th>
+                            <th>Lot Size</th>
+                            <th>Profit at 1:1 RR</th>
+                            <th>Profit at 1:2 RR</th>
+                            <th>Profit at 1:3 RR</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sc-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================================ -->
+        <!-- SECTION 4: RISK MANAGEMENT TIPS -->
+        <!-- ================================ -->
+        <div class="calc-section">
+            <h2>💡 Risk Management Rules</h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🎯</div>
+                    <h4>The 1% Rule</h4>
+                    <p>Never risk more than 1-2% of your account on a single trade. This alone can save you from blowing
+                        your account during a losing streak.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📐</div>
+                    <h4>Minimum 1:2 RR</h4>
+                    <p>Always aim for at least a 1:2 risk-to-reward ratio. With a 40% win rate and 1:2 RR, you're still
+                        profitable.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📉</div>
+                    <h4>Max Drawdown Guard</h4>
+                    <p>Set a daily loss limit (e.g. 3%). Once hit, stop trading for the day. Emotions compound losses
+                        faster than you think.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🧮</div>
+                    <h4>Position Sizing Math</h4>
+                    <p>Lot = (Balance × Risk%) ÷ (SL pips × Pip Value). Always calculate BEFORE entering — never guess
+                        your size.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔥</div>
+                    <h4>After a Losing Streak</h4>
+                    <p>After 3 consecutive losses, consider halving your position size until you recover your confidence
+                        and read the market correctly again.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">✅</div>
+                    <h4>Breakeven Win Rate</h4>
+                    <p>Formula: 1 ÷ (1 + RR Ratio). At 1:2 RR, you only need to win 33% of trades to break even. Know
+                        your number.</p>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end .risk-page -->
+
+    <!-- Firebase + Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        // ============================================
+        // LOT SIZE CALCULATOR
+        // ============================================
+        function calcLotSize() {
+            const balance = parseFloat(document.getElementById('ls-balance').value) || 0;
+            const riskPct = parseFloat(document.getElementById('ls-risk-pct').value) || 1;
+            const slPips = parseFloat(document.getElementById('ls-sl-pips').value) || 1;
+            const pipValPerLot = parseFloat(document.getElementById('ls-pair-type').value) || 10;
+
+            if (balance <= 0 || slPips <= 0) { alert('Please enter valid values.'); return; }
+
+            const riskAmt = balance * (riskPct / 100);
+            const lotSize = riskAmt / (slPips * pipValPerLot);
+            const pipVal = pipValPerLot;
+            const maxLoss = lotSize * slPips * pipValPerLot;
+
+            document.getElementById('ls-risk-amt').textContent = `$${riskAmt.toFixed(2)}`;
+            document.getElementById('ls-lot').textContent = lotSize.toFixed(2);
+            document.getElementById('ls-pip-val').textContent = `$${pipVal.toFixed(2)}`;
+            document.getElementById('ls-max-loss').textContent = `$${maxLoss.toFixed(2)}`;
+            document.getElementById('ls-results').style.display = 'grid';
+        }
+
+        // ============================================
+        // RR VISUALIZER
+        // ============================================
+        function calcRR() {
+            const entry = parseFloat(document.getElementById('rr-entry').value);
+            const sl = parseFloat(document.getElementById('rr-sl').value);
+            const tp = parseFloat(document.getElementById('rr-tp').value);
+            const dir = document.getElementById('rr-direction').value;
+
+            if (isNaN(entry) || isNaN(sl) || isNaN(tp)) { alert('Please fill in all price fields.'); return; }
+
+            let riskPips, rewardPips;
+            if (dir === 'buy') {
+                riskPips = Math.abs((entry - sl) * 10000);
+                rewardPips = Math.abs((tp - entry) * 10000);
+            } else {
+                riskPips = Math.abs((sl - entry) * 10000);
+                rewardPips = Math.abs((entry - tp) * 10000);
+            }
+
+            if (riskPips <= 0) { alert('Stop loss must be on the correct side of entry.'); return; }
+
+            const rrRatio = rewardPips / riskPips;
+            const beWinRate = (1 / (1 + rrRatio)) * 100;
+
+            document.getElementById('rr-risk-pips').textContent = riskPips.toFixed(1);
+            document.getElementById('rr-reward-pips').textContent = rewardPips.toFixed(1);
+            document.getElementById('rr-ratio').textContent = `1:${rrRatio.toFixed(2)}`;
+            document.getElementById('rr-be-winrate').textContent = `${beWinRate.toFixed(1)}%`;
+
+            // Update bar widths
+            const total = riskPips + rewardPips;
+            const riskW = (riskPips / total * 100).toFixed(1);
+            const rewardW = (rewardPips / total * 100).toFixed(1);
+            document.getElementById('rr-risk-bar').style.width = riskW + '%';
+            document.getElementById('rr-risk-bar').textContent = `Risk ${riskPips.toFixed(0)}p`;
+            document.getElementById('rr-reward-bar').style.width = rewardW + '%';
+            document.getElementById('rr-reward-bar').textContent = `Reward ${rewardPips.toFixed(0)}p`;
+
+            // Verdict
+            const verdictEl = document.getElementById('rr-verdict');
+            if (rrRatio >= 2) {
+                verdictEl.style.color = 'var(--success)';
+                verdictEl.textContent = `✅ Excellent trade setup! ${rrRatio.toFixed(2)}R — Worth taking.`;
+            } else if (rrRatio >= 1) {
+                verdictEl.style.color = 'var(--primary)';
+                verdictEl.textContent = `⚠️ Acceptable setup (${rrRatio.toFixed(2)}R). Consider tightening SL or widening TP.`;
+            } else {
+                verdictEl.style.color = 'var(--danger)';
+                verdictEl.textContent = `❌ Poor RR (${rrRatio.toFixed(2)}R). Risk outweighs reward — reconsider this trade.`;
+            }
+
+            document.getElementById('rr-results').style.display = 'block';
+        }
+
+        // ============================================
+        // SCENARIO TABLE
+        // ============================================
+        function calcScenarios() {
+            const balance = parseFloat(document.getElementById('sc-balance').value) || 10000;
+            const slPips = parseFloat(document.getElementById('sc-sl').value) || 30;
+            const pipVal = parseFloat(document.getElementById('sc-pip-val').value) || 10;
+
+            const riskLevels = [0.5, 1, 1.5, 2, 3, 5];
+            const tbody = document.getElementById('sc-table-body');
+            tbody.innerHTML = '';
+
+            riskLevels.forEach(pct => {
+                const riskAmt = balance * (pct / 100);
+                const lotSize = riskAmt / (slPips * pipVal);
+                const p1 = lotSize * slPips * pipVal;
+                const p2 = p1 * 2;
+                const p3 = p1 * 3;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td style="font-weight:700; color:var(--primary)">${pct}%</td>
+          <td class="negative-cell">$${riskAmt.toFixed(2)}</td>
+          <td style="font-weight:700">${lotSize.toFixed(2)}</td>
+          <td class="positive-cell">+$${p1.toFixed(2)}</td>
+          <td class="positive-cell">+$${p2.toFixed(2)}</td>
+          <td class="positive-cell">+$${p3.toFixed(2)}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('sc-table-wrap').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
