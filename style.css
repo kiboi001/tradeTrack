@@ -27,6 +27,7 @@
   scrollbar-color: var(--primary) var(--bg-main);
 }
 
+html,
 body {
   background: var(--bg-main);
   background-image:
@@ -37,6 +38,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  width: 100%;
   line-height: 1.6;
   position: relative;
 }
@@ -173,6 +175,9 @@ body::after {
   display: flex;
   min-height: 100vh;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .sidebar {
@@ -245,8 +250,9 @@ body::after {
   flex: 1;
   padding: 3rem;
   width: 100%;
+  max-width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 header { margin-bottom: 3rem; position: relative; z-index: 1; }

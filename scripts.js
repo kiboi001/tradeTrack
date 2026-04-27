@@ -32,38 +32,59 @@
     window.pendingUser = null; // clear
   }
 
-  // ---------- JS Image Compressor ----------
-  async function compressImage(file, maxWidth = 1200, quality = 0.6) {
+  // ---------- JS Image Compressor (Turbo Compressor v2) ----------
+  const COMPRESS_CONFIG = {
+    maxWidth: 1080,      // enough for beautiful display
+    maxHeight: 1080,
+    quality: 0.72,       // initial quality
+    targetBytes: 100000, // ~100KB base64 target
+    mimeType: 'image/webp',
+    fallbackMime: 'image/jpeg'
+  };
+
+  async function compressImage(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = event => {
+      reader.onload = (e) => {
         const img = new Image();
-        img.src = event.target.result;
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
+          try {
+            const { w, h } = _fitDimensions(img.width, img.height);
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
 
-          // Resize if wider than maxWidth
-          if (width > maxWidth) {
-            height *= maxWidth / width;
-            width = maxWidth;
-          }
+            const supportsWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+            const mime = supportsWebP ? COMPRESS_CONFIG.mimeType : COMPRESS_CONFIG.fallbackMime;
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+            let quality = COMPRESS_CONFIG.quality;
+            let base64 = canvas.toDataURL(mime, quality);
 
-          // Get compressed base64
-          const dataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(dataUrl);
+            let attempts = 0;
+            // Adaptive quality — reduce quality until under target size
+            while (base64.length > COMPRESS_CONFIG.targetBytes * 1.37 && attempts < 6) {
+              quality -= 0.1;
+              base64 = canvas.toDataURL(mime, Math.max(quality, 0.2));
+              attempts++;
+            }
+            resolve(base64);
+          } catch (err) { reject(err); }
         };
-        img.onerror = error => reject(error);
+        img.onerror = reject;
+        img.src = e.target.result;
       };
-      reader.onerror = error => reject(error);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
+  }
+
+  function _fitDimensions(srcW, srcH) {
+    const { maxWidth, maxHeight } = COMPRESS_CONFIG;
+    if (srcW <= maxWidth && srcH <= maxHeight) return { w: srcW, h: srcH };
+    const ratio = Math.min(maxWidth / srcW, maxHeight / srcH);
+    return { w: Math.round(srcW * ratio), h: Math.round(srcH * ratio) };
   }
 
   // load trades safely
@@ -290,8 +311,8 @@
       if (fileEl && fileEl.files && fileEl.files[0]) {
         const file = fileEl.files[0];
         try {
-          // JS Compression logic to stay under Firestore 1MB limit
-          screenData = await compressImage(file, 1200, 0.6);
+          // JS Compression logic to stay under Firestore 1MB limit (Turbo Compressor v2)
+          screenData = await compressImage(file);
         } catch (err) {
           console.error('Compression error', err);
           return alert('Error processing image');
@@ -630,21 +651,31 @@
 
   // main updater called after any change
   window.updateAllViews = function () {
-    renderJournalTable();
-    renderGallery();
-    renderTransactionLog();
-    renderRecentTradesDashboard();
-    populateFilters();
-    updateStatsUI();
-    updateDashboardUI();
-    // Sync balance input if exists
-    const balInput = id('initialBalanceInput');
-    if (balInput && document.activeElement !== balInput) {
-      balInput.value = readInitialBalance();
-    }
-    // Notify dashboard of trade count (for onboarding state)
-    if (typeof window.onDashboardReady === 'function') {
-      window.onDashboardReady(TRADES.length);
+    try {
+      renderJournalTable();
+      renderGallery();
+      renderTransactionLog();
+      renderRecentTradesDashboard();
+      populateFilters();
+      updateStatsUI();
+      updateDashboardUI();
+
+      // Sync balance input
+      const balInput = id('initialBalanceInput');
+      if (balInput && document.activeElement !== balInput) {
+        balInput.value = readInitialBalance();
+      }
+
+      // Notify dashboard to hide loader
+      if (typeof window.onDashboardReady === 'function') {
+        window.onDashboardReady(TRADES.length);
+      }
+    } catch (err) {
+      console.error("❌ updateAllViews Error:", err);
+      // Still try to hide the loader so the user isn't stuck
+      if (typeof window.onDashboardReady === 'function') {
+        window.onDashboardReady(TRADES.length);
+      }
     }
   };
 

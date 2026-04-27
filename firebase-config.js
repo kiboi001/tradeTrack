@@ -26,6 +26,19 @@ var db = (typeof firebase.firestore === 'function') ? firebase.firestore() : nul
 var auth = (typeof firebase.auth === 'function') ? firebase.auth() : null;
 var storage = (typeof firebase.storage === 'function') ? firebase.storage() : null;
 
+// Safari-specific: Firestore settings to improve iPad compatibility
+// longerPollingInterval reduces connection drops on mobile Safari
+if (db) {
+    try {
+        db.settings({
+            experimentalForceLongPolling: isSafariOrIOS(), // Long polling on iOS/Safari
+            merge: true
+        });
+    } catch (e) {
+        // Settings already applied or not supported — ignore
+    }
+}
+
 // ── iPad / Safari fix ──────────────────────────────────────────────────────────
 // `enablePersistence()` fails silently on Safari ITP and iPad private mode.
 // We catch ALL errors and fall back gracefully without breaking the app.
@@ -48,19 +61,6 @@ if (db) {
             }
             // App continues normally without offline persistence
         });
-}
-
-// Safari-specific: Firestore settings to improve iPad compatibility
-// longerPollingInterval reduces connection drops on mobile Safari
-if (db) {
-    try {
-        db.settings({
-            experimentalForceLongPolling: isSafariOrIOS(), // Long polling on iOS/Safari
-            merge: true
-        });
-    } catch (e) {
-        // Settings already applied or not supported — ignore
-    }
 }
 
 // Detect Safari or iOS device
