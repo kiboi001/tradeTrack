@@ -36,8 +36,8 @@
       try {
         const adminDoc = await db.collection('admins').doc(user.uid).get();
 
-        // Safety net: If collection check fails but UID matches the owner
-        const isOwner = user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2";
+        // Safety net: If collection check fails but UID matches the owner or email matches
+        const isOwner = user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com");
 
         if (!adminDoc.exists && !isOwner) {
           renderAccessError(user);
@@ -48,7 +48,8 @@
         setupLiveListeners();
       } catch (err) {
         // Even if Firestore fails (permissions), let the owner through if UID matches
-        if (user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2") {
+        const isOwner = user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com");
+        if (isOwner) {
           setupLiveListeners();
         } else {
           console.error("Admin Auth Error:", err);
@@ -68,8 +69,13 @@
       renderUserTable();
     });
 
+    const searchInput = id('user-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', renderUserTable);
+    }
+
     // 2. Listen for support tickets
-    db.collection('tickets').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    db.collection('tickets').onSnapshot(snap => {
       const tickets = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const badge = id('ticket-count-badge');
       if (badge) {
@@ -102,18 +108,30 @@
         pnlEl.style.color = totalProfit >= 0 ? '#00ff88' : '#ff4d4d';
       }
     });
+
+    // 4. Global Payments Listener
+    db.collection('payments').limit(50).onSnapshot(snap => {
+      const payments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderGlobalPayments(payments);
+    });
   }
 
   function renderUserTable() {
     const listEl = id('user-list');
     if (!listEl) return;
 
-    if (ALL_USERS.length === 0) {
+    const searchTerm = (id('user-search')?.value || '').toLowerCase();
+    const filteredUsers = ALL_USERS.filter(u => 
+      (u.email || '').toLowerCase().includes(searchTerm) || 
+      (u.id || '').toLowerCase().includes(searchTerm)
+    );
+
+    if (filteredUsers.length === 0) {
       listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888; padding: 40px;">No users found.</td></tr>';
       return;
     }
 
-    listEl.innerHTML = ALL_USERS.map(user => {
+    listEl.innerHTML = filteredUsers.map(user => {
       const tierColor = user.subscription === 'Pro Annual' ? '#ff9100' : (user.subscription === 'Pro Monthly' ? '#00d4ff' : '#8b949e');
       return `
         <tr>
@@ -180,51 +198,182 @@
     }).join('');
   }
 
+  function renderGlobalPayments(payments) {
+    const listEl = id('global-payments-list');
+    if (!listEl) return;
+
+    if (payments.length === 0) {
+      listEl.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888; padding: 40px;">No recent payments found.</td></tr>';
+      return;
+    }
+
+    listEl.innerHTML = payments.map(p => {
+      const dateStr = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString() : new Date().toLocaleDateString();
+      const amount = (p.amount || 0) / 100; // Assuming amount is in cents, standard for Paystack/Stripe
+      
+      return `
+        <tr>
+          <td><div style="font-size: 0.85rem; color: var(--text-muted);">${dateStr}</div></td>
+          <td>
+            <div style="font-weight: 700; color: #fff;">${p.email || 'N/A'}</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">UID: ${p.uid?.substring(0,8)}...</div>
+          </td>
+          <td>
+            <span style="background: rgba(0,255,136,0.1); color: #00ff88; padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">
+              ${p.plan || 'Subscription'}
+            </span>
+          </td>
+          <td><div style="font-weight: 800; color: #fff;">$${amount.toFixed(2)}</div></td>
+          <td><div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">${p.reference || p.id}</div></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.switchModalTab = function(tabName) {
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    document.querySelectorAll('.modal-tab-content').forEach(content => content.style.display = 'none');
+    const target = id(`modal-tab-${tabName}`);
+    if (target) target.style.display = 'block';
+  }
+
   window.viewUserTrades = async function (userId, email) {
     const modal = id('user-details-modal');
-    const modalContent = id('user-trades-list');
+    if (!modal) return;
+    
     const emailEl = id('modal-user-email');
-    if (!modal || !modalContent) return;
-
-    modal.style.display = 'grid';
     if (emailEl) emailEl.textContent = email;
-    modalContent.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">Fetching audit trail...</div>';
 
+    // Set UI to loading state
+    ['trades', 'transactions', 'settings', 'payments'].forEach(tab => {
+      const el = id(`user-${tab}-list`) || id(`user-${tab}-data`);
+      if (el) el.innerHTML = `<div style="text-align: center; padding: 40px; color: #888;">Fetching ${tab}...</div>`;
+    });
+
+    const userObj = ALL_USERS.find(u => u.id === userId);
+    const profileEl = id('user-profile-data');
+    if (profileEl && userObj) {
+        profileEl.innerHTML = `
+            <div style="padding: 20px;">
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Account Summary</h4>
+                <p><strong>Email:</strong> ${userObj.email || 'N/A'}</p>
+                <p><strong>UID:</strong> <span style="font-family: monospace;">${userObj.id}</span></p>
+                <p><strong>Tier:</strong> ${userObj.subscription || 'Free'}</p>
+                <p><strong>Status:</strong> ${userObj.disabled ? '<span style="color: #ff4d4d;">Suspended</span>' : '<span style="color: #00ff88;">Active</span>'}</p>
+            </div>
+        `;
+    }
+
+    modal.style.display = 'flex';
+    switchModalTab('profile'); // Reset to profile tab when opening
+    
+    // Fetch user specific data
     try {
-      const snap = await db.collection('users').doc(userId).collection('trades').orderBy('date', 'desc').get();
-      const trades = snap.docs.map(d => d.data());
-
-      if (trades.length === 0) {
-        modalContent.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">No trading history found for this account.</div>';
-        return;
+      // 1. Trades
+      const tradesSnap = await db.collection('users').doc(userId).collection('trades').get();
+      const trades = tradesSnap.docs.map(d => d.data());
+      const tradesEl = id('user-trades-list');
+      if (tradesEl) {
+          if (trades.length === 0) {
+              tradesEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">No trading history found.</div>';
+          } else {
+              tradesEl.innerHTML = `
+                <table class="admin-table">
+                  <thead><tr><th>Date</th><th>Pair</th><th>Side</th><th>Result</th><th style="text-align: right;">P/L</th></tr></thead>
+                  <tbody>
+                    ${trades.map(t => `
+                      <tr>
+                        <td style="font-family: monospace; font-size: 0.8rem;">${t.date}</td>
+                        <td style="font-weight: 700;">${t.pair}</td>
+                        <td style="color: ${t.direction === 'buy' ? '#00d4ff' : '#ff9100'}; font-weight: 800; font-size: 0.7rem;">${(t.direction || 'BUY').toUpperCase()}</td>
+                        <td><span style="font-size: 0.75rem; color: ${parseFloat(t.profit) >= 0 ? '#00ff88' : '#ff4d4d'}; font-weight: 800;">${(t.status || 'win').toUpperCase()}</span></td>
+                        <td style="text-align: right; font-weight: 800; color: ${parseFloat(t.profit) >= 0 ? '#fff' : '#ff4d4d'}">$${Number(t.profit).toFixed(2)}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              `;
+          }
       }
 
-      modalContent.innerHTML = `
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Pair</th>
-              <th>Side</th>
-              <th>Result</th>
-              <th style="text-align: right;">P/L</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${trades.map(t => `
-              <tr>
-                <td style="font-family: monospace; font-size: 0.8rem;">${t.date}</td>
-                <td style="font-weight: 700;">${t.pair}</td>
-                <td style="color: ${t.direction === 'buy' ? '#00d4ff' : '#ff9100'}; font-weight: 800; font-size: 0.7rem;">${(t.direction || 'BUY').toUpperCase()}</td>
-                <td><span style="font-size: 0.75rem; color: ${parseFloat(t.profit) >= 0 ? '#00ff88' : '#ff4d4d'}; font-weight: 800;">${(t.status || 'win').toUpperCase()}</span></td>
-                <td style="text-align: right; font-weight: 800; color: ${parseFloat(t.profit) >= 0 ? '#fff' : '#ff4d4d'}">$${Number(t.profit).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
+      // 2. Transactions
+      const transSnap = await db.collection('users').doc(userId).collection('transactions').get();
+      const transactions = transSnap.docs.map(d => d.data());
+      const transEl = id('user-transactions-list');
+      if (transEl) {
+          if (transactions.length === 0) {
+              transEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">No transactions found.</div>';
+          } else {
+              transEl.innerHTML = `
+                <table class="admin-table">
+                  <thead><tr><th>Date</th><th>Type</th><th>Method</th><th style="text-align: right;">Amount</th></tr></thead>
+                  <tbody>
+                    ${transactions.map(t => `
+                      <tr>
+                        <td style="font-family: monospace; font-size: 0.8rem;">${t.date}</td>
+                        <td><span style="font-weight: 700; color: ${t.type === 'deposit' ? '#00ff88' : '#ff4d4d'};">${(t.type || 'N/A').toUpperCase()}</span></td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">${t.method || 'Transfer'}</td>
+                        <td style="text-align: right; font-weight: 800; color: #fff;">$${Number(t.amount || 0).toFixed(2)}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              `;
+          }
+      }
+
+      // 3. Settings
+      const settingsSnap = await db.collection('users').doc(userId).collection('settings').get();
+      const settingsEl = id('user-settings-data');
+      if (settingsEl) {
+          if (settingsSnap.empty) {
+              settingsEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">No custom settings found.</div>';
+          } else {
+              const sDoc = settingsSnap.docs[0].data();
+              settingsEl.innerHTML = `
+                <div style="padding: 20px;">
+                    <pre style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px; border: 1px solid var(--border); color: #00d4ff; overflow-x: auto;">${JSON.stringify(sDoc, null, 2)}</pre>
+                </div>
+              `;
+          }
+      }
+
+      // 4. Payments
+      const paySnap = await db.collection('payments').where('uid', '==', userId).get();
+      const userPayments = paySnap.docs.map(d => d.data());
+      const payEl = id('user-payments-list');
+      if (payEl) {
+          if (userPayments.length === 0) {
+              payEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">No payment history found.</div>';
+          } else {
+              payEl.innerHTML = `
+                <table class="admin-table">
+                  <thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Ref</th></tr></thead>
+                  <tbody>
+                    ${userPayments.map(p => {
+                      const amount = (p.amount || 0) / 100;
+                      return `
+                      <tr>
+                        <td style="font-family: monospace; font-size: 0.8rem;">${p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+                        <td><span style="font-weight: 700; color: var(--primary);">${p.plan || 'Sub'}</span></td>
+                        <td style="font-weight: 800; color: #fff;">$${amount.toFixed(2)}</td>
+                        <td style="color: var(--text-muted); font-size: 0.75rem;">${p.reference || p.id}</td>
+                      </tr>
+                    `}).join('')}
+                  </tbody>
+                </table>
+              `;
+          }
+      }
+
     } catch (e) {
-      modalContent.innerHTML = `<div style="color: #ff4d4d; padding: 20px;">Error: ${e.message}</div>`;
+      console.error("Error fetching user data:", e);
+      ['trades', 'transactions', 'settings', 'payments'].forEach(tab => {
+        const el = id(`user-${tab}-list`) || id(`user-${tab}-data`);
+        if (el) el.innerHTML = `<div style="color: #ff4d4d; padding: 20px; text-align: center;">Error loading data: ${e.message}</div>`;
+      });
     }
   }
 

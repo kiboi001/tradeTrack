@@ -29,10 +29,27 @@
             if (user) {
                 console.log('Firebase Auth: User is logged in as', user.email);
 
-                // If on login page, send to dashboard. 
-                // We allow them to browse index.html even if logged in, or we can redirect there too.
+                // If on login page, send to dashboard or admin page
                 if (isLoginPage && !isAdminPage) {
-                    window.location.href = 'dashboard.html';
+                    // 1. Check if it's the master owner UID or email
+                    if (user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com")) {
+                        window.location.href = 'admin.html';
+                        return;
+                    }
+                    
+                    // 2. Check if they are in the admins collection
+                    db.collection('admins').doc(user.uid).get().then(doc => {
+                        if (doc.exists) {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }).catch(err => {
+                        console.error("Error checking admin status:", err);
+                        window.location.href = 'dashboard.html';
+                    });
+                    
+                    return; // Stop execution, wait for redirect
                 }
 
                 // Fix race condition: Scripts.js might not be loaded yet
