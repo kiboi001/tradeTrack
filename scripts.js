@@ -34,10 +34,10 @@
 
   // ---------- JS Image Compressor (Turbo Compressor v2) ----------
   const COMPRESS_CONFIG = {
-    maxWidth: 1080,      // enough for beautiful display
-    maxHeight: 1080,
-    quality: 0.72,       // initial quality
-    targetBytes: 100000, // ~100KB base64 target
+    maxWidth: 1200,      // Slightly larger for better detail
+    maxHeight: 1200,
+    quality: 0.8,        // Better initial quality
+    targetBytes: 150000, // ~150KB target (very safe for Firestore 1MB)
     mimeType: 'image/webp',
     fallbackMime: 'image/jpeg'
   };
@@ -306,16 +306,25 @@
       if (!pairEl || !pairEl.value) return alert('Enter pair');
       if (profitEl && rawProfit.trim() === '') return alert('Enter profit or loss value');
 
-      // Process Screenshot
+      // Process Screenshot (Turbo Compressor v2 - Local)
       let screenData = null;
       if (fileEl && fileEl.files && fileEl.files[0]) {
         const file = fileEl.files[0];
         try {
-          // JS Compression logic to stay under Firestore 1MB limit (Turbo Compressor v2)
+          if (submitBtn) {
+            submitBtn.textContent = 'Compressing...';
+            submitBtn.disabled = true;
+          }
+          // Compress locally (staying under 1MB)
           screenData = await compressImage(file);
         } catch (err) {
           console.error('Compression error', err);
-          return alert('Error processing image');
+          alert('Error processing image');
+          if (submitBtn) {
+            submitBtn.textContent = submitBtn.dataset.mode === 'edit' ? 'Update Trade' : 'Add Trade';
+            submitBtn.disabled = false;
+          }
+          return;
         }
       } else {
         // preserve existing screenshot if editing and no new file selected
@@ -349,12 +358,17 @@
 
       // If update mode
       if (submitBtn && submitBtn.dataset.mode === 'edit' && submitBtn.dataset.tradeId) {
-        addOrUpdateTrade(candidate, submitBtn.dataset.tradeId);
+        await addOrUpdateTrade(candidate, submitBtn.dataset.tradeId);
         submitBtn.textContent = 'Add Trade';
+        submitBtn.disabled = false;
         delete submitBtn.dataset.mode;
         delete submitBtn.dataset.tradeId;
       } else {
-        addOrUpdateTrade(candidate, null);
+        await addOrUpdateTrade(candidate, null);
+        if (submitBtn) {
+          submitBtn.textContent = 'Add Trade';
+          submitBtn.disabled = false;
+        }
       }
       form.reset();
       if (fileEl) fileEl.value = ''; // Clear file input
@@ -391,10 +405,11 @@
         }
       }
 
-      // Screenshot Button
+      // Screenshot Button — store trade id, not the full base64 in HTML
+      const hasScreenshot = !!(t.screenshot && typeof t.screenshot === 'string');
       let screenHtml = '-';
-      if (t.screenshot) {
-        screenHtml = `<button class="view-btn" data-img="${t.screenshot}" style="background:none; border:none; cursor:pointer;" title="View Screenshot">📷</button>`;
+      if (hasScreenshot) {
+        screenHtml = `<button class="view-btn" data-tradeid="${t.id}" style="background:none; border:none; cursor:pointer; font-size:1.2rem;" title="View Screenshot">📷</button>`;
       }
 
       tr.innerHTML = `
@@ -420,14 +435,13 @@
       tbody.appendChild(tr);
     });
 
-    // Attach View Screenshot Handler
+    // Attach View Screenshot Handler — look up trade by ID (no base64 in HTML)
     tbody.querySelectorAll('.view-btn').forEach(btn => {
       btn.onclick = () => {
-        const imgData = btn.dataset.img;
-        const win = window.open("", "Screenshot", "width=800,height=600");
-        if (win) {
-          win.document.write(`<img src="${imgData}" style="max-width:100%; height:auto;">`);
-        }
+        const tradeId = btn.dataset.tradeid;
+        const trade = readTrades().find(t => t.id === tradeId);
+        if (!trade || !trade.screenshot) return;
+        openModal(trade);
       };
     });
 
@@ -579,22 +593,19 @@
     // NEW: Average RR
     setText(['avgRR', 'avg-rr', 'average-rr'], `1:${s.avgRR.toFixed(2)}`);
 
-    // NEW: Advanced Metrics
-    if (typeof computeAdvancedMetrics === 'function') {
-      const adv = computeAdvancedMetrics(trades);
-      setText(['max-drawdown'], `$${adv.maxDrawdown.toFixed(2)}`);
-      setText(['profit-factor'], adv.profitFactor.toFixed(2));
-      setText(['win-streak'], adv.maxWinStreak);
-      setText(['loss-streak'], adv.maxLossStreak);
-    }
+    // Advanced Metrics
+    const adv = computeAdvancedMetrics(trades);
+    setText(['max-drawdown'], `$${adv.maxDrawdown.toFixed(2)}`);
+    setText(['profit-factor'], adv.profitFactor.toFixed(2));
+    setText(['win-streak'], adv.maxWinStreak);
+    setText(['loss-streak'], adv.maxLossStreak);
 
     // Update initial balance display if exists
     const initBalEl = id('initialBalanceDisplay');
     if (initBalEl) initBalEl.textContent = `$${initialBal.toFixed(2)}`;
 
-    // Trigger Chart Updates if function exists
-    if (window.updateCharts) window.updateCharts(trades);
-    if (window.renderBestTrades) window.renderBestTrades(trades);
+    // Trigger Chart Updates if function exists (only here, not in updateAllViews too)
+    if (typeof window.renderBestTrades === 'function') window.renderBestTrades(trades);
 
     // NEW: Update transaction summary elements if they exist
     const transactions = readTransactions();
@@ -653,7 +664,7 @@
   window.updateAllViews = function () {
     try {
       console.log("🔄 updateAllViews: Refreshing all components...");
-      
+
       renderJournalTable();
       renderGallery();
       renderTransactionLog();
@@ -667,9 +678,9 @@
         window.initCalendar();
       }
 
-      // Update charts if they exist
+      // Update charts with filtered trades
       if (typeof window.updateCharts === 'function') {
-        window.updateCharts();
+        window.updateCharts(readTrades());
       }
 
       // Also sync the balance input if it exists
@@ -691,15 +702,14 @@
     }
   };
 
-  // ---------- Screenshot Gallery Rendering ----------
+  // ---------- Screenshot Gallery Rendering (Lazy Load) ----------
   function renderGallery() {
     const galleryGrid = id('gallery-grid');
     if (!galleryGrid) return;
 
-    // Ensure we have screenshots and they are strings
-    const trades = readTrades().filter(t => t.screenshot && typeof t.screenshot === 'string' && t.screenshot.length > 0);
+    const trades = readTrades().filter(t => t.screenshot && typeof t.screenshot === 'string' && t.screenshot.trim().length > 0);
 
-    console.log(`🖼️ renderGallery: Found ${trades.length} trades with screenshots`);
+    console.log(`🖼️ renderGallery: Found ${trades.length} screenshots.`);
 
     if (trades.length === 0) {
       galleryGrid.innerHTML = '<p style="color: #888; grid-column: 1/-1;">No screenshots yet.</p>';
@@ -707,12 +717,32 @@
     }
 
     galleryGrid.innerHTML = '';
+
+    // Lazy load using IntersectionObserver — same technique as nae project
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('lazy-hidden');
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '150px' });
+
     trades.forEach(t => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
-      item.innerHTML = `<img src="${t.screenshot}" alt="${t.pair}" onerror="this.parentElement.style.display='none'">`;
+      const img = document.createElement('img');
+      img.dataset.src = t.screenshot;
+      img.alt = t.pair;
+      img.className = 'lazy-hidden';
+      img.style.cssText = 'background:#111; min-height:120px; width:100%; height:100%; object-fit:cover;';
+      img.onerror = function() { this.parentElement.style.display = 'none'; };
+      item.appendChild(img);
       item.onclick = () => openModal(t);
       galleryGrid.appendChild(item);
+      observer.observe(img);
     });
   }
 
