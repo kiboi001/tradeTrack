@@ -652,6 +652,8 @@
   // main updater called after any change
   window.updateAllViews = function () {
     try {
+      console.log("🔄 updateAllViews: Refreshing all components...");
+      
       renderJournalTable();
       renderGallery();
       renderTransactionLog();
@@ -660,7 +662,17 @@
       updateStatsUI();
       updateDashboardUI();
 
-      // Sync balance input
+      // Update calendar if it exists
+      if (typeof window.initCalendar === 'function') {
+        window.initCalendar();
+      }
+
+      // Update charts if they exist
+      if (typeof window.updateCharts === 'function') {
+        window.updateCharts();
+      }
+
+      // Also sync the balance input if it exists
       const balInput = id('initialBalanceInput');
       if (balInput && document.activeElement !== balInput) {
         balInput.value = readInitialBalance();
@@ -684,7 +696,10 @@
     const galleryGrid = id('gallery-grid');
     if (!galleryGrid) return;
 
-    const trades = readTrades().filter(t => t.screenshot);
+    // Ensure we have screenshots and they are strings
+    const trades = readTrades().filter(t => t.screenshot && typeof t.screenshot === 'string' && t.screenshot.length > 0);
+
+    console.log(`🖼️ renderGallery: Found ${trades.length} trades with screenshots`);
 
     if (trades.length === 0) {
       galleryGrid.innerHTML = '<p style="color: #888; grid-column: 1/-1;">No screenshots yet.</p>';
@@ -695,7 +710,7 @@
     trades.forEach(t => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
-      item.innerHTML = `<img src="${t.screenshot}" alt="${t.pair}">`;
+      item.innerHTML = `<img src="${t.screenshot}" alt="${t.pair}" onerror="this.parentElement.style.display='none'">`;
       item.onclick = () => openModal(t);
       galleryGrid.appendChild(item);
     });
@@ -949,8 +964,9 @@
     console.log("👂 Setting up Trades listener...");
     userRef.collection('trades').onSnapshot(snap => {
       console.log(`📦 Trades snapshot received: ${snap.docs.length} trades`);
-      TRADES = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      updateAllViews();
+      // Normalize each trade as it comes in
+      TRADES = snap.docs.map(doc => normalizeTrade({ id: doc.id, ...doc.data() }));
+      window.updateAllViews();
     }, error => {
       console.error('❌ Trades listener error:', error);
     });
@@ -960,7 +976,7 @@
     userRef.collection('transactions').onSnapshot(snap => {
       console.log(`💰 Transactions snapshot received: ${snap.docs.length} transactions`);
       TRANSACTIONS = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      updateAllViews();
+      window.updateAllViews();
     }, error => {
       console.error('❌ Transactions listener error:', error);
     });
@@ -971,7 +987,7 @@
       if (doc.exists) {
         INITIAL_BALANCE = doc.data().initialBalance || 0;
         console.log(`⚙️ Settings loaded: Initial Balance = $${INITIAL_BALANCE}`);
-        updateAllViews();
+        window.updateAllViews();
       } else {
         console.log("⚙️ No settings document found, using default balance");
       }
@@ -1020,33 +1036,6 @@
       localStorage.removeItem(INIT_BAL_KEY);
     }
   }
-
-  // main updater called after any change
-  window.updateAllViews = function () {
-    renderJournalTable();
-    renderGallery();
-    renderTransactionLog();
-    renderRecentTradesDashboard(); // NEW
-    populateFilters();
-    updateStatsUI();
-    updateDashboardUI();
-
-    // Update calendar if it exists
-    if (typeof window.initCalendar === 'function') {
-      window.initCalendar();
-    }
-
-    // Update charts if they exist
-    if (typeof window.updateCharts === 'function') {
-      window.updateCharts();
-    }
-
-    // Also sync the balance input if it exists
-    const balInput = id('initialBalanceInput');
-    if (balInput && document.activeElement !== balInput) {
-      balInput.value = readInitialBalance();
-    }
-  };
 
   // init
   document.addEventListener('DOMContentLoaded', () => {
@@ -1129,9 +1118,9 @@
   // storage cross-tab
   window.addEventListener('storage', (e) => {
     if (e.key === TRADES_KEY) {
-      updateAllViews();
+      window.updateAllViews();
     }
-    if (e.key === INIT_BAL_KEY) updateAllViews();
+    if (e.key === INIT_BAL_KEY) window.updateAllViews();
   });
 
   // expose a small helper to bootstrap sample data for quick testing in console
@@ -1141,3 +1130,4 @@
     saveTrades(norm);
   };
 })();
+
