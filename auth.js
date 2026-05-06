@@ -32,7 +32,11 @@
                 // If on login page, send to dashboard or admin page
                 if (isLoginPage && !isAdminPage) {
                     // 1. Check if it's the master owner UID or email
-                    if (user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com")) {
+                    const aSecrets = window.TRADETRACK_SECRETS || {};
+                    const isAdminUID = (aSecrets.ADMIN_UIDS || []).includes(user.uid);
+                    const isAdminEmail = (aSecrets.ADMIN_EMAILS || []).map(e => e.toLowerCase()).includes(user.email ? user.email.toLowerCase() : "");
+
+                    if (isAdminUID || isAdminEmail) {
                         window.location.href = 'admin.html';
                         return;
                     }

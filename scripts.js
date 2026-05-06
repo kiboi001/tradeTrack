@@ -87,6 +87,92 @@
     return { w: Math.round(srcW * ratio), h: Math.round(srcH * ratio) };
   }
 
+  // ---------- Grammar & Formatting Fixer ----------
+  function grammarFixer(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    let fixed = text.trim();
+    if (!fixed) return '';
+
+    // 1. Capitalize first letter of every sentence
+    fixed = fixed.replace(/(^\w|\.\s+\w)/g, match => match.toUpperCase());
+
+    // 2. Ensure space after commas and periods if missing
+    fixed = fixed.replace(/,([^\s])/g, ', $1');
+    fixed = fixed.replace(/\.([^\s\d])/g, '. $1'); 
+
+    // 3. Fix common trading abbreviations & terms capitalization
+    const tradingTerms = [
+      'eurusd', 'gbpusd', 'xauusd', 'usdjpy', 'audusd', 'nzdusd', 'usdchf', 'usdcad',
+      'us30', 'nas100', 'sp500', 'dxy', 'btc', 'eth', 'sol', 'bnb', 'xrp',
+      'smc', 'rsi', 'fibo', 'sl', 'tp', 'be', 'rr', 'pnl', 'roi',
+      'fvg', 'ob', 'mss', 'choch', 'bos', 'poi', 'htf', 'ltf', 'pdh', 'pdl', 'pwl', 'pwh',
+      'ict', 'liq', 'eqh', 'eql', 'idm', 'ifvg', 'bb', 'rto', 'mff', 'ftmo', 'payout'
+    ];
+    
+    tradingTerms.forEach(term => {
+      const regex = new RegExp(`\\b${term}\\b`, 'gi');
+      fixed = fixed.replace(regex, term.toUpperCase());
+    });
+
+    // 4. Remove multiple spaces and extra newlines
+    fixed = fixed.replace(/[ \t]+/g, ' ');
+    fixed = fixed.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+    // 5. Add period at the end IF it looks like a sentence (e.g., > 12 chars)
+    // and doesn't already end in punctuation.
+    if (fixed.length > 12 && /[a-z0-9]$/i.test(fixed)) {
+      fixed += '.';
+    }
+
+    return fixed;
+  }
+
+  window.applyGrammarFix = (el) => {
+    if (el && el.value) {
+      el.value = grammarFixer(el.value);
+    }
+  };
+
+  // ---------- Cloudinary Configuration ----------
+  const cSecrets = (window.TRADETRACK_SECRETS && window.TRADETRACK_SECRETS.CLOUDINARY) || {};
+  const CLOUDINARY_CONFIG = {
+    cloudName: cSecrets.cloudName || '',
+    uploadPreset: cSecrets.uploadPreset || 'YOUR_UNSIGNED_PRESET'
+  };
+
+  async function uploadToCloudinary(file) {
+    const isPlaceholder = CLOUDINARY_CONFIG.uploadPreset === 'YOUR_UNSIGNED_PRESET';
+    
+    if (!CLOUDINARY_CONFIG.cloudName || isPlaceholder) {
+      console.warn('Cloudinary preset missing. Falling back to local compression.');
+      return await compressImage(file);
+    }
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        console.warn('Cloudinary API Error, falling back:', err.error?.message);
+        return await compressImage(file);
+      }
+
+      const data = await response.json();
+      console.log('✅ Cloudinary upload success');
+      return data.secure_url;
+    } catch (err) {
+      console.warn('Cloudinary network error, falling back:', err.message);
+      return await compressImage(file);
+    }
+  }
+
   // load trades safely
   function readTrades() {
     return TRADES;
@@ -306,20 +392,20 @@
       if (!pairEl || !pairEl.value) return alert('Enter pair');
       if (profitEl && rawProfit.trim() === '') return alert('Enter profit or loss value');
 
-      // Process Screenshot (Turbo Compressor v2 - Local)
+      // Process Screenshot (Cloudinary with Local Fallback)
       let screenData = null;
       if (fileEl && fileEl.files && fileEl.files[0]) {
         const file = fileEl.files[0];
         try {
           if (submitBtn) {
-            submitBtn.textContent = 'Compressing...';
+            submitBtn.textContent = 'Uploading...';
             submitBtn.disabled = true;
           }
-          // Compress locally (staying under 1MB)
-          screenData = await compressImage(file);
+          // Try Cloudinary first, falls back to compression if preset is missing
+          screenData = await uploadToCloudinary(file);
         } catch (err) {
-          console.error('Compression error', err);
-          alert('Error processing image');
+          console.error('Upload error', err);
+          alert('Error processing image: ' + err.message);
           if (submitBtn) {
             submitBtn.textContent = submitBtn.dataset.mode === 'edit' ? 'Update Trade' : 'Add Trade';
             submitBtn.disabled = false;
@@ -338,7 +424,7 @@
       const sessionEl = id('session');
 
       const candidate = {
-        pair: pairEl.value.trim(),
+        pair: grammarFixer(pairEl.value.trim()),
         profit: Number.isFinite(profitNum) ? profitNum : 0,
         status: statusEl ? statusEl.value : (profitNum < 0 ? 'loss' : 'win'),
         lot: lotEl ? lotEl.value : '',
@@ -346,12 +432,12 @@
         entryTime: entryTimeEl ? entryTimeEl.value : '',
         exitTime: exitTimeEl ? exitTimeEl.value : '',
         rr: rrEl ? rrEl.value : 0,
-        strategy: strategyEl ? strategyEl.value : '',
+        strategy: grammarFixer(strategyEl ? strategyEl.value : ''),
         screenshot: screenData,
         entryDate: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0],
         exitDate: (exitDateEl && exitDateEl.value) ? exitDateEl.value : new Date().toISOString().split('T')[0],
         date: (entryDateEl && entryDateEl.value) ? entryDateEl.value : new Date().toISOString().split('T')[0],
-        notes: notesEl ? notesEl.value : '',
+        notes: grammarFixer(notesEl ? notesEl.value : ''),
         timeframe: timeframeEl ? timeframeEl.value : '',
         session: sessionEl ? sessionEl.value : ''
       };
@@ -667,6 +753,7 @@
 
       renderJournalTable();
       renderGallery();
+      renderNotesGallery();
       renderTransactionLog();
       renderRecentTradesDashboard();
       populateFilters();
@@ -754,7 +841,13 @@
     if (!modal || !modalImg || !caption) return;
 
     modal.style.display = 'block';
-    modalImg.src = trade.screenshot;
+    
+    if (trade.screenshot) {
+      modalImg.style.display = 'block';
+      modalImg.src = trade.screenshot;
+    } else {
+      modalImg.style.display = 'none';
+    }
 
     const statusColor = trade.profit > 0 ? '#00E676' : '#FF5252';
     const statusText = trade.profit > 0 ? 'WIN' : 'LOSS';
@@ -764,7 +857,49 @@
       <span style="color: #8899a6;">Date:</span> ${trade.date} | 
       <span style="color: #8899a6;">Pair:</span> ${trade.pair} | 
       <span style="color: #8899a6;">P/L:</span> <span style="color: ${statusColor}">$${Number(trade.profit || 0).toFixed(2)}</span>
+      ${trade.notes ? `<div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 1rem; line-height: 1.5; color: #eee; text-align: left;">${trade.notes}</div>` : ''}
     `;
+  }
+
+  // ---------- Notes Gallery Rendering ----------
+  function renderNotesGallery() {
+    const notesGrid = id('notes-grid');
+    if (!notesGrid) return;
+
+    const trades = readTrades().filter(t => t.notes && t.notes.trim().length > 0);
+
+    console.log(`📝 renderNotesGallery: Found ${trades.length} trades with notes.`);
+
+    if (trades.length === 0) {
+      notesGrid.innerHTML = '<p style="color: #888; grid-column: 1/-1;">No notes yet.</p>';
+      return;
+    }
+
+    notesGrid.innerHTML = '';
+
+    trades.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      
+      const statusColor = t.profit > 0 ? '#00E676' : (t.profit < 0 ? '#FF5252' : '#888');
+      
+      card.innerHTML = `
+        <div class="note-header">
+          <span class="note-pair">${t.pair}</span>
+          <span class="note-date">${t.date}</span>
+        </div>
+        <div class="note-body">
+          ${t.notes.length > 120 ? t.notes.substring(0, 120) + '...' : t.notes}
+        </div>
+        <div class="note-footer">
+          <span style="color: ${statusColor}; font-weight: 700;">${t.profit >= 0 ? (t.profit > 0 ? 'WIN' : 'BREAKEVEN') : 'LOSS'}</span>
+          <button class="view-note-btn">Read More</button>
+        </div>
+      `;
+
+      card.onclick = () => openModal(t);
+      notesGrid.appendChild(card);
+    });
   }
 
   // ---------- Dashboard Recent Trades ----------

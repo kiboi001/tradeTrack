@@ -1,14 +1,17 @@
 // firebase-config.js
 // Fixed for iPad / Safari compatibility (IndexedDB / ITP issues)
 
+// Safe access to secrets with empty fallbacks to prevent crashes
+const secrets = window.TRADETRACK_SECRETS || { FIREBASE: {} };
+
 const firebaseConfig = {
-    apiKey: "AIzaSyDyTCmpcS7rsqmDrnI85lS-C14Z1Jom7jU",
-    authDomain: "tradetrack-44b18.firebaseapp.com",
-    projectId: "tradetrack-44b18",
-    storageBucket: "tradetrack-44b18.firebasestorage.app",
-    messagingSenderId: "223490443349",
-    appId: "1:223490443349:web:8517b9fb49c240f5f82cdc",
-    measurementId: "G-RJ3NTVPWYH"
+    apiKey: secrets.FIREBASE.apiKey || "",
+    authDomain: secrets.FIREBASE.authDomain || "",
+    projectId: secrets.FIREBASE.projectId || "",
+    storageBucket: secrets.FIREBASE.storageBucket || "",
+    messagingSenderId: secrets.FIREBASE.messagingSenderId || "",
+    appId: secrets.FIREBASE.appId || "",
+    measurementId: secrets.FIREBASE.measurementId || ""
 };
 
 // Initialize Firebase using the Compat SDK

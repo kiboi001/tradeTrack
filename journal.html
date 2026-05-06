@@ -45,7 +45,7 @@
       <!-- Row 1 -->
       <div>
         <label for="pair">Currency Pair</label>
-        <input type="text" id="pair" placeholder="e.g. XAUUSD, EURUSD" required>
+        <input type="text" id="pair" placeholder="e.g. XAUUSD, EURUSD" onblur="window.applyGrammarFix(this)" required>
       </div>
       <div>
         <label for="lot">Lot Size</label>
@@ -124,7 +124,7 @@
       <!-- Row 5 -->
       <div>
         <label for="strategy">Strategy / Tag <span style="color:#666;font-size:0.8rem;">(optional)</span></label>
-        <input type="text" id="strategy" placeholder="e.g. Breakout, SMC, Fib">
+        <input type="text" id="strategy" placeholder="e.g. Breakout, SMC, Fib" onblur="window.applyGrammarFix(this)">
       </div>
       <div>
         <label for="screenshot">Chart Screenshot <span style="color:#666;font-size:0.8rem;">(optional)</span></label>
@@ -136,7 +136,7 @@
       <!-- Notes spans full width -->
       <div style="grid-column: 1 / -1;">
         <label for="notes">Notes <span style="color:#666;font-size:0.8rem;">(optional)</span></label>
-        <textarea id="notes" placeholder="What did you do well? What could be improved?"></textarea>
+        <textarea id="notes" placeholder="What did you do well? What could be improved?" onblur="window.applyGrammarFix(this)"></textarea>
       </div>
 
       <button type="submit">Add Trade</button>
@@ -201,6 +201,14 @@
     </div>
   </section>
 
+  <!-- Notes Gallery Section -->
+  <section class="gallery-section notes-gallery-section">
+    <h2>📝 Notes Gallery</h2>
+    <div class="notes-grid" id="notes-grid">
+      <p style="color: #888; grid-column: 1/-1;">No notes yet.</p>
+    </div>
+  </section>
+
   <!-- Image Modal -->
   <div id="imgModal" class="modal">
     <span class="modal-close" onclick="document.getElementById('imgModal').style.display='none'">&times;</span>
@@ -213,6 +221,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <script src="secrets.js"></script>
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
   <script src="scripts.js" defer></script>

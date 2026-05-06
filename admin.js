@@ -37,7 +37,10 @@
         const adminDoc = await db.collection('admins').doc(user.uid).get();
 
         // Safety net: If collection check fails but UID matches the owner or email matches
-        const isOwner = user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com");
+        const aSecrets = window.TRADETRACK_SECRETS || {};
+        const isAdminUID = (aSecrets.ADMIN_UIDS || []).includes(user.uid);
+        const isAdminEmail = (aSecrets.ADMIN_EMAILS || []).map(e => e.toLowerCase()).includes(user.email ? user.email.toLowerCase() : "");
+        const isOwner = isAdminUID || isAdminEmail;
 
         if (!adminDoc.exists && !isOwner) {
           renderAccessError(user);
@@ -48,7 +51,10 @@
         setupLiveListeners();
       } catch (err) {
         // Even if Firestore fails (permissions), let the owner through if UID matches
-        const isOwner = user.uid === "33EFXNGFH1XXK5nHyDh6AzG4kDL2" || (user.email && user.email.toLowerCase() === "workwithki4i@gmail.com");
+        const aSecrets = window.TRADETRACK_SECRETS || {};
+        const isAdminUID = (aSecrets.ADMIN_UIDS || []).includes(user.uid);
+        const isAdminEmail = (aSecrets.ADMIN_EMAILS || []).map(e => e.toLowerCase()).includes(user.email ? user.email.toLowerCase() : "");
+        const isOwner = isAdminUID || isAdminEmail;
         if (isOwner) {
           setupLiveListeners();
         } else {
